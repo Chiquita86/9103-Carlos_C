@@ -1,3 +1,15 @@
+// In sketch7, I added offscreen buffers (p5.Graphics) for each grid cell. These buffers store pre-rendered images
+// of zigzag circles or hand-drawn circles. Instead of redrawing the complex shapes every frame in draw(), I only draw
+// them once during setup() and reuse them in the draw() loop. This creates a spinning grid of shapes with much better
+// performance and a more dynamic, fluid visual effect. Without this offscreen buffer technique, the page would constantly
+// flicker or redraw the shapes, making it look jittery and not smooth. By using p5.Graphics buffers, I avoided this flicker
+// problem and achieved a continuous, seamless spinning animation for all shapes in the grid.
+//
+// This technique was not covered in the basic coding lessons. It was inspired by:
+// - "Drawing to Graphics Buffer" by Fabian Winkler (OpenProcessing.org, https://openprocessing.org/sketch/381081)
+// - ChatGPT also helped me to understand how to implement this buffer system and why it fixes the flicker issue.
+// I also added dynamic rotation angles and rotation speeds to each cell for more interesting, animated motion.
+
 // I added a color palette extracted from the painting ‘Wheel of Fortune’ instead of random RGB
 let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 
@@ -8,7 +20,20 @@ let angles = [];   //store the current angle of each circle
 let speeds = [];   //store the current spin speed of each circle
 let buffers = [];  // add off-screen layer caching
 
+/**
+ * The following lines were taken from ChatGPT and examples like
+ * "Drawing to Graphics Buffer" by Fabian Winkler (OpenProcessing.org, https://openprocessing.org/sketch/381081).
+ * We want to create offscreen buffers (p5.Graphics) that store complex static graphics (zigzag circles or hand-drawn circles)
+ * only once during setup(), and then reuse them in draw() to animate them. This boosts performance and creates a dynamic visual effect.
+ * The process has multiple Steps. Each are commented below.
+ */
+
 function setup() {
+    /**
+     * Step 1: Create an offscreen buffer (p5.Graphics) for each grid cell.
+     * We only draw the complex shapes (zigzag circles or hand-drawn circles) once to these buffers.
+     * These buffers will be reused in draw() to animate them without redrawing each frame.
+     */
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
 
@@ -28,13 +53,19 @@ function setup() {
         let startCol = (r % 2 === 0) ? -1 : 0;
 
         for (let c = startCol; c < numCols; c++) {
+            /**
+             * Step 2: Initialize each cell's rotation angle and spin speed.
+             */
+            
             // angle and speed
             angles[r][c] = random(TWO_PI);
             let arcPerSec = random(TWO_PI/90, TWO_PI/45);  // speed can be adjusted  
             speeds[r][c] = arcPerSec / 1000 * (random() < 0.5 ? 1 : -1);
 
+          /**
+           * Step 3: Create the p5.Graphics buffer for this cell and draw its static graphic only once.
+           */
             // Offscreen layer caching: draw each static circle once onto a p5.Graphics (PG)
-            // Offscreen layer strategy (osteele, 2022), see appendix.
             let pg = createGraphics(gridSizeX, gridSizeY);
             pg.clear();
             pg.noStroke();
@@ -50,6 +81,9 @@ function setup() {
 }
 
     function draw() {
+    /**
+     * Step 4: Clear background and animate the spinning shapes using the pre-rendered buffers.
+     */
     background('#007B88'); //background color can be adjust!!
     let gridSizeX = width / numCols; 
     let gridSizeY = height / numRows;
@@ -64,7 +98,9 @@ function setup() {
 
             // update angle
             angles[r][c] += speeds[r][c] * deltaTime;
-
+            /**
+             * Step 5: Draw the offscreen buffer at this grid position with rotation.
+             */
             push();
             translate(cx, cy);
             rotate(angles[r][c]);

@@ -49,6 +49,16 @@ function drawHandDrawnCircle(cx, cy, numLayers, maxRadius){
   }
 }
 
+
+/**
+ * The following function was adapted from the original `drawZigzagPattern()`
+ * in the reference code by Jera0420 (2024). 
+ * Source: https://github.com/jera0420/jera0420_MajorProject
+ * This function uses trigonometric functions and vertex-based shape creation
+ * (not covered in basic coding lessons). It creates a zigzag circle by alternating
+ * between inner and outer radius vertex points in a polar coordinate system.
+ * I adjusted the strokeWeight to random values for more dynamic visuals.
+ */
 //Adding zigzagcircle shape
 //Refering zigzagcircle code (Jera0420,2024), see appendix.
     // I change the wavycircle to zigzagcircle, but you can choose the version
@@ -64,8 +74,9 @@ function drawHandDrawnCircle(cx, cy, numLayers, maxRadius){
     let outerRadius = maxRadius * 0.9;
     let innerRadius = outerRadius * (2 / 3);
 
+    // This technique is based on alternating inner and outer radius vertex points to form a zigzag path.
+    // It works by incrementing the angle by angleStep and connecting vertices. Used ChatGPT to understand the function.
     // The color and thickness of the zigzag are based on the original artwork, but with slight random variations and could adjust
-    // Used ChatGPT, see appendix.
     let zigR = random(120, 255); 
     let zigG = random(120, 100);
     let zigB = random(120, 255);
@@ -94,11 +105,12 @@ function drawHandDrawnCircle(cx, cy, numLayers, maxRadius){
 
   endShape(CLOSE); // end the zigzagcircle shape
 
-  //reduce the geometric proportion to avoid covering the tooth edges
-  //Use GPT, see appendix. reuse the original drawHandDrawnCircle and reduce its size
+  //Reduce the geometric fill circles to avoid overlapping the zigzag shape
+  //Reuse the original drawHandDrawnCircle() with smaller radius
+  //Use GPT to understand how zigzag shape works and its function. 
   drawHandDrawnCircle(cx, cy, numLayers, outerRadius * 0.6); 
 }
-//Zigzagcircle Shape ends
+//I add the Zigzagcircle Shape changing ends here
 
 //Add windowResized for responsive design
 function windowResized() {

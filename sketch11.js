@@ -12,6 +12,14 @@ let randomCirclePosition = [];//replace grid array
 //let speeds = [];   //store the current spin speed of each circle
 //let buffers = [];  // add off-screen layer caching
 
+/**
+ * The following lines were taken from ChatGPT and examples like
+ * "Drawing to Graphics Buffer" by Fabian Winkler (OpenProcessing.org, https://openprocessing.org/sketch/381081).
+ * We want to create offscreen buffers (p5.Graphics) that store complex static graphics (zigzag circles or hand-drawn circles)
+ * only once during setup(), and then reuse them in draw() to animate them. This boosts performance and creates a dynamic visual effect.
+ * The process has multiple Steps. Each are commented below. 
+ * Also can see offscreen buffers details in sketch7
+ */
 function setup() {
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
@@ -198,6 +206,16 @@ function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
     }
 }
 
+/**
+ * The following function was adapted from the original `drawZigzagPattern()`
+ * in the reference code by Jera0420 (2024). 
+ * Source: https://github.com/jera0420/jera0420_MajorProject
+ * This function uses trigonometric functions and vertex-based shape creation
+ * (not covered in basic coding lessons). It creates a zigzag circle by alternating
+ * between inner and outer radius vertex points in a polar coordinate system.
+ * I adjusted the strokeWeight to random values for more dynamic visuals.
+ * See Zigzagcircle details in sketch4
+ */
 //PG:drawZigzagCircle
 function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     // Used palette color with some transparency

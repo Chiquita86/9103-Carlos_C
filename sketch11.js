@@ -2,6 +2,10 @@
 let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 // I added a slider to adjust the hue and brightness of the image
 let hueSlider, brightnessSlider;
+/**
+ * I use the needRedrawBuffers flag and buffers to avoid redrawing everything on every frame, rebuilding caches only when necessary.
+ * Reference: https://p5js.org/reference/p5/redraw/
+ */
 let needRedrawBuffers = true;
 let randomCirclePosition = [];//replace grid array
 
@@ -25,7 +29,14 @@ function setup() {
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
 
-
+    /**
+    * This section of code creates sliders to allow interactive adjustment of hue and brightness.
+    * References:
+        *  https://p5js.org/reference/p5/createSlider/
+        *  https://p5js.org/reference/p5/hue/
+        *  https://p5js.org/reference/p5/brightness/
+        *  https://p5js.org/reference/p5/lightness/
+    */
     hueSlider = createSlider(-180, 180, 0);
     hueSlider.position(10, 10);
     hueSlider.style('width', '200px');

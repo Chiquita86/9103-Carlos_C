@@ -8,9 +8,17 @@ let playButton;
 
 let song, fft, amp; // I added p5.FFT() and p5.Amplitude（)
 
+let songFiles = [
+    "❤️/White Ferrari  Frank Ocean Cover.mp3",
+    "❤️/See You Again - Tyler.mp3",
+    "❤️/LOVE. - Kendrick Lamar.mp3",
+    "❤️/HUMBLE. - Kendrick Lamar.mp3",
+];
+let songSelect;
+
 function preload(){
     //preload my audio file
-    song = loadSound('music/White Ferrari  Frank Ocean Cover.mp3')
+    song = loadSound(songFiles[0]);
 }
 
 /**
@@ -60,6 +68,29 @@ function setup() {
     //Audio analyzers
     fft = new p5.FFT();
     amp = new p5.Amplitude();
+
+    //Create dropdown menu 
+    songSelect = createSelect();
+    songSelect.position(10, 140);
+    songSelect.style('width', '200px');
+    songSelect.style('font-size', '16px');
+    songSelect.style('background-color', 'hotpink');
+    songSelect.style('border-radius', '10px');
+    songSelect.style('padding', '5px');
+
+    for(let i = 0; i < songFiles.length; i++){
+        songSelect.option(songFiles[i], i);
+    }
+    //Change song when selection changes
+    songSelect.changed(() => {
+        if(song.isPlaying()){
+            song.stop();
+        }
+        let selectedIndex = songSelect.value();
+        song = loadSound(songFiles[selectedIndex], () => {
+            song.play();
+        });
+    });
 
     //Create play/pause Button
     playButton = createButton('Play / Pause');
@@ -145,7 +176,7 @@ function generateRandomCircles(){
     //Set volume
     let volumeValue = volumeSlider.value() / 100.0;
     song.setVolume(volumeValue);
-    
+
     //Set alpha
     let alphaValue = map(volumeValue, 0, 1, 20, 100);
 

@@ -8,21 +8,10 @@ let firstSelected = null;// save the circle the first time selected for merge
 let birdImage;
 let initialState = [];
 
-//I add the buffer for spin
-//const numCols = 8;
-//const numRows = 5;
-//let angles = [];   //store the current angle of each circle
-//let speeds = [];   //store the current spin speed of each circle
-//let buffers = [];  // add off-screen layer caching
+function preload(){
+    birdImage = loadImage("assets/IMG_2978.png");
+}
 
-/**
- * The following lines were taken from ChatGPT and examples like
- * "Drawing to Graphics Buffer" by Fabian Winkler (OpenProcessing.org, https://openprocessing.org/sketch/381081).
- * We want to create offscreen buffers (p5.Graphics) that store complex static graphics (zigzag circles or hand-drawn circles)
- * only once during setup(), and then reuse them in draw() to animate them. This boosts performance and creates a dynamic visual effect.
- * The process has multiple Steps. Each are commented below. 
- * Also can see offscreen buffers details in sketch7
- */
 function setup() {
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
@@ -83,11 +72,11 @@ function setup() {
         tries++;// add try times
       }
 
-      initialState = randomCirclePosition.map(cp => ({
+      initialState = randomCirclePosition.map(cp => ({//All current circles save their initial state to the initialState array.
         x: cp.x,
         y: cp.y,
         r: cp.r,
-        originalR: cp.r,
+        originalR: cp.r,//Save an extra copy of the original radius for subsequent recovery of the initial size
         pg: cp.pg,
         angle: cp.angle,
         speed: cp.speed,
@@ -98,48 +87,10 @@ function setup() {
         floatAmplitude: cp.floatAmplitude
       }));
     }
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-    // let numCols = 8;
-    // let numRows = 5; //I change the line to make symmetry
-    // let layers = 12; //I adjust a liitle bit to make it more colorful
-    // let maxRadius = min(gridSizeX, gridSizeY) * 0.5; //I adjust a liitle bit
-
-    // Initialize angles, speeds, and offscreen buffers
-    //for (let r = 0; r < numRows; r++) {
-      //  angles[r]  = [];
-       //speeds[r]  = [];
-       // buffers[r] = [];
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            // angle and speed
-            //angles[r][c] = random(TWO_PI);
-            //let arcPerSec = random(TWO_PI/90, TWO_PI/45);  // speed can be adjusted  
-            //speeds[r][c] = arcPerSec / 1000 * (random() < 0.5 ? 1 : -1);
-
-            // Offscreen layer caching: draw each static circle once onto a p5.Graphics (PG)
-            // Offscreen layer strategy (osteele, 2022), see appendix.
-            // let pg = createGraphics(gridSizeX, gridSizeY);
-            // pg.clear();
-            // pg.noStroke();
-            // let cx = gridSizeX/2, cy = gridSizeY/2;
-            // if (random(1) < 0.2) {
-            //     drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            // } else {
-            //     drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            // buffers[r][c] = pg; // store PG for this cell
-        //}
-    //}
-     //rebuildBuffers();
-//}
 
 
-    function draw() {
+function draw() {
         background('#000000'); //background color can be adjust!!
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
 
     //birdimage position and scale
     let birdOffsetX = 180;
@@ -218,28 +169,6 @@ function setup() {
         pop();
 
     }
-       // rebuildBuffers();
-       // needRedrawBuffers = false;
-    //}
-
-      // for (let r = 0; r < numRows; r++) {
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-       // for (let c = startCol; c < numCols; c++) {
-            //let cx = c * gridSizeX + gridSizeX/2 + offset;
-            //let cy = r * gridSizeY + gridSizeY/2;
-
-            // update angle
-            //angles[r][c] += speeds[r][c] * deltaTime;
-
-            //push();
-            //translate(cx, cy);
-            //rotate(angles[r][c]);
-            //imageMode(CENTER);
-            //image(buffers[r][c], 0, 0);
-           // pop();
-        //}
 
 // PG: drawHandDrawnCircle
 function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
@@ -272,16 +201,6 @@ function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
     }
 }
 
-/**
- * The following function was adapted from the original `drawZigzagPattern()`
- * in the reference code by Jera0420 (2024). 
- * Source: https://github.com/jera0420/jera0420_MajorProject
- * This function uses trigonometric functions and vertex-based shape creation
- * (not covered in basic coding lessons). It creates a zigzag circle by alternating
- * between inner and outer radius vertex points in a polar coordinate system.
- * I adjusted the strokeWeight to random values for more dynamic visuals.
- * See Zigzagcircle details in sketch4
- */
 //PG:drawZigzagCircle
 function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     // Used palette color with some transparency
@@ -332,35 +251,6 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     }
 }
 
-//function rebuildBuffers() {
-    //let gridSizeX = width / numCols;
-    //let gridSizeY = height / numRows;
-    
-    //let layers = 12;
-    //let maxRadius = min(gridSizeX, gridSizeY) * 0.5;
-
-   // for (let r = 0; r < numRows; r++) {
-        //buffers[r] = [];
-        //let offset = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            //let pg = createGraphics(gridSizeX, gridSizeY);
-            //pg.colorMode(HSB, 360, 100, 100);
-            //pg.clear();
-            //pg.noStroke();
-            //let cx = gridSizeX / 2;
-            //let cy = gridSizeY / 2;
-
-            //if (random(1) < 0.2) {
-                //drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            //} else {
-                //drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            //}
-            //buffers[r][c] = pg;
-        //}
-    //}
-//}
 
 // //buffers can be rebuilt if necessary
 function windowResized() {
@@ -484,10 +374,6 @@ function mousePressed(){
     }
 }
 
-function preload(){
-    birdImage = loadImage("assets/IMG_2978.png");
-}
-
 function keyPressed(){
     if(key === '1'){
         for(let cp of randomCirclePosition){
@@ -526,7 +412,7 @@ function keyPressed(){
             }
 
             return{
-                ...cp,
+                ...cp,//Batch copy all attributes of the old object
                 pg: pg,
                 x: cp.x,
                 y: cp.y,

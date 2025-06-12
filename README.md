@@ -1,13 +1,5 @@
-# IDEA9103 - Creative Coding Major Project
+# IDEA9103 - Creative Coding Major Project_QiFang_User Input
 # 9103-Carlos_C
-
----
-
-## Team Members  
-- **Joy Zeng** (qzen0648) SID: 540398368  
-- **Lilin Chen** (lche0503) SID: 530399221  
-- **Qi Fang** (qfan0163) SID: 540627615  
-- **Yulin Zeng** (yzen0964) SID: 550113469  
 
 ---
 
@@ -16,47 +8,43 @@
 
 ---
 
-## Description  
-This project is an interactive, dynamic visualisation inspired by Pacita Abad’s vibrant painting *Wheels of Fortune*.  
-Our final piece features a canvas of non-overlapping, color-rich circles that rotate, float, and continuously evolve in response to real-time user input.  
-Each circle is rendered with hand-drawn textures and dot embellishments to echo the layered, vibrant aesthetic of Abad’s work.
+## User Input Description  
+Based on the group layout, I added a couple of interactive features:
 
-Below is a reference image of the original painting:
+1. when the mouse clicks on two circles, the two circles merge and become a new circle.
 
-![Pacita Abad - 'Wheels of Fortune'](./assets/Pacita_Abad_Wheels_of_fortune.jpg)
+![click two circle and then create a new one](./assets/Original%20status.png)
+![click two circle and then create a new one](./assets/merge%20circle.png)
 
-And here’s a screenshot of our final interactive visualisation:
+2. a little bird pattern follows the mouse.
 
-![Final Piece - Wheels of Fortune Visualisation](./assets/finalproject.png)
+![birdimage follow the mouse](./assets/birdimage%20follow.png)
 
----
+3. when the bird pattern is close to the circle, the circle avoids the bird pattern.
 
-## Key Features  
-- **Floating Circles:** 50 colorful, hand-drawn circles placed dynamically on the canvas, animated with a floating effect to create a sense of movement.  
-- **Color Palette:** The color palette is directly extracted from *Wheels of Fortune* to retain the painting’s original mood and vibrancy.  
-- **Interactivity:**  
-  - **Hue Adjustment:** Use the **Hue Slider** (top left corner) to shift the hue of all circle colors.  
-  - **Brightness Adjustment:** Use the **Brightness Slider** (below the Hue Slider) to control the brightness of the circles.  
-- **Responsive Design:** The canvas resizes automatically to fit different window sizes.
+![the circles avoid birdimage](./assets/circle%20avoid%20bird.png)
 
----
+4. Press keyboard 1 and the size of the circle on the screen will change randomly.
 
-## How to Use / View  
-1. **Open the HTML file** containing the embedded JavaScript code.
-2. **Interact with the sliders** at the top left of the screen:  
-   - Drag the **Hue Slider** to shift the colors of the floating circles around the color wheel.  
-   - Drag the **Brightness Slider** to lighten or darken the colors.  
-3. **Observe the circles** rotating and floating dynamically on the screen, creating an ever-changing composition inspired by Pacita Abad’s artistic style.
-Use the sliders to adjust hue and brightness, transforming the color palette in real time and discovering new variations within the same visual language, an exploration of color and texture that invites the viewer to participate in the project.
+![press 1 in the keyboard](./assets/original%20before%201.png)
+![press 1 in the keyboard](./assets/keyboard%201.png)
 
-Below is an example showing the effect of adjusting the sliders:
+5. Press keyboard 2, the color of the disc on the screen will change randomly.
 
-![Adjusting sliders to explore color variations](./assets/adjusted_sliders.jpg)
+![press 2 in the keyboard](./assets/keyboard%202.png)
+
+6. Press keyboard 3, the screen will be restored to its initial state.
+
+![press 3 in the keyboard](./assets/original%20before%201.png)
+![press 3 in the keyboard](./assets/back.png)
 
 ---
 
-## Technical Notes  
-- The animation runs continuously without explicit “start/stop” controls.  
-- **If resizing the window**, the canvas and circles automatically adjust and re-render to fit the new size.
-- **If refreshing the page**, a new arrangement of circles will be generated, offering a fresh combination of positions, shapes, and textures.
----
+## Reference  
+- **https://p5js.org/reference/p5/mousePressed/:** Code reference for clicking on two circles and then generating a new circle.
+- **https://p5js.org/reference/p5.Element/mousePressed/:** Code reference for clicking on two circles and then generating a new circle.
+- **https://openprocessing.org/sketch/2615691:** Code reference for clicking on two circles and then generating a new circle.
+- **https://natureofcode.com/forces/:** Circle to avoid following the mouse to move the bird pattern code reference.
+- **https://editor.p5js.org/awcuny/sketches:** Circle to avoid following the mouse to move the bird pattern code reference, check mouse in circle.
+- **https://p5js.org/tutorials/responding-to-inputs/:** Code reference for restoring the screen to its initial state by pressing the keypad.
+- **https://p5js.org/examples/classes-and-objects-connected-particles/:** Code reference for restoring the screen to its initial state by pressing the keypad.

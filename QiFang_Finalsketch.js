@@ -341,6 +341,8 @@ function mousePressed(){
                 }
 
         //merge new circle
+        let newR = random(30, 120);
+
         let newX = constrain((a.x + b.x) / 2, newR, width - newR);
         let newY = constrain((a.y + b.y) / 2, newR, height - newR);
         

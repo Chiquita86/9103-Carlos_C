@@ -4,6 +4,7 @@ let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f",
 let hueSlider, brightnessSlider;
 let needRedrawBuffers = true;
 let randomCirclePosition = [];//replace grid array
+let playButton;
 
 let song, fft, amp; // I added p5.FFT() and p5.Amplitude（)
 
@@ -25,22 +26,34 @@ function setup() {
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
     //Hue slider
+    let hueLabel = createP("Hue Adjustment");
+    hueLabel.position(230,-5);
+    hueLabel.style('color','pink');
     hueSlider = createSlider(-180, 180, 0);
     hueSlider.position(10, 10);
     hueSlider.style('width', '200px');
     hueSlider.input(()=> needRedrawBuffers = true);
 
     //Brightness slider
+    let brightnessLabel = createP("Brightness Adjustment");
+    brightnessLabel.position(230,24);
+    brightnessLabel.style('color','pink');
     brightnessSlider = createSlider(50, 150, 100);
     brightnessSlider.position(10, 40);
     brightnessSlider.style ('width', '200px');
     brightnessSlider.input(()=> needRedrawBuffers = true);
 
     //Volume slider
+    let volumeLabel = createP("Volume Adjustment");
+    volumeLabel.position(230, 55);
+    volumeLabel.style('color','pink');
     volumeSlider = createSlider (0, 100, 50);
     volumeSlider.position(10, 70).style('width', '200px');
 
     //Speed slider
+    let speedLabel = createP("Speed Adjustment");
+    speedLabel.position(230, 84);
+    speedLabel.style('color','pink');
     speedSlider = createSlider (50, 200, 100);
     speedSlider.position(10, 100).style('width', '200px');
 
@@ -49,8 +62,14 @@ function setup() {
     amp = new p5.Amplitude();
 
     //Create play/pause Button
-    let playButton = createButton('Play/Pause');
-    playButton.position(10, 130);
+    playButton = createButton('Play / Pause');
+    playButton.position(windowWidth / 2 - 105, windowHeight - 50);
+    playButton.style('font-size', '24px');
+    playButton.style('background-color','pink');
+    playButton.style('border-radius', '10px');
+    playButton.style('padding', '5px 20px');
+    playButton.style('border', 'none');
+
     playButton.mousePressed(() => {
         if(song.isPlaying()){
             song.pause();
@@ -126,6 +145,9 @@ function generateRandomCircles(){
     //Set volume
     let volumeValue = volumeSlider.value() / 100.0;
     song.setVolume(volumeValue);
+    
+    //Set alpha
+    let alphaValue = map(volumeValue, 0, 1, 20, 100);
 
     //Set speed interaction
     let speedValue = speedSlider.value() / 100.0;
@@ -150,7 +172,7 @@ function generateRandomCircles(){
             let baseCol = color(random(palette));
             let newHue = (hue(baseCol) + hueSlider.value() + 360) % 360;
             let newBrightness = brightness(baseCol) * (brightnessSlider.value() / 100);
-            fill(newHue, saturation(baseCol), newBrightness, 80);
+            fill(newHue, saturation(baseCol), newBrightness, alphaValue);
 
             noStroke();
             rect(i * barWidth, height, barWidth, -barHeight);
@@ -291,7 +313,7 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
 // //buffers can be rebuilt if necessary
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight); 
-
+    playButton.position(windowWidth / 2 - 105, windowHeight - 50);
     randomCirclePosition = [];
     let count = 50;
     let attempts = 0;

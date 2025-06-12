@@ -34,13 +34,14 @@ Increased the spacing buffer between circles to prevent overlapping during anima
 Used songs from Frank Ocean, Tyler the Creator, and Kendrick Lamar, reflecting personal music preferences.
 
 ## Technical Overview  
-generateRandomCircles() creates non-overlapping floating circles with randomized positions and sizes.
-draw() function combines:
-  Center ripple wave background (animated using millis() timing).
-  Audio spectrum visualization (fft.analyze()).
-  Floating circle reactions driven by bass energy (getEnergy("bass")) and amplitude.
+`generateRandomCircles()` creates non-overlapping floating circles with randomized positions and sizes.
+`draw()` function combines:
+  Center ripple wave background (animated using `millis()` timing).
+  Audio spectrum visualization (`fft.analyze()`).
+  Floating circle reactions driven by bass energy (`getEnergy("bass")`) and amplitude.
   Slider-based real-time adjustments for hue, brightness, volume, and speed.
-windowResized() dynamically adapts the canvas size and repositions UI elements upon window resizing.
+`windowResized()` dynamically adapts the canvas size and repositions UI elements upon window resizing.
+
 ---
 
 ## How to Use / View  

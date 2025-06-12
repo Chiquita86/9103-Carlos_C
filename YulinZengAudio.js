@@ -112,8 +112,13 @@ function generateRandomCircles(){
             let barWidth = width / spectrum.length;
             let barHeight = map(specVal, 0, 255, 0, height*0.5); 
 
-            let h = map(i, 0, spectrum.length, 0, 360);
-            fill((h + hueSlider.value() + random(-10, 10))%360, 80, 100, 80);
+            //let h = map(i, 0, spectrum.length, 0, 360);
+            //fill((h + hueSlider.value() + random(-10, 10))%360, 80, 100, 80);
+
+            let baseCol = color(random(palette));
+            let newHue = (hue(baseCol) + hueSlider.value() + 360) % 360;
+            let newBrightness = brightness(baseCol) * (brightnessSlider.value() / 100);
+            fill(newHue, saturation(baseCol), newBrightness, 80);
 
             noStroke();
             rect(i * barWidth, height, barWidth, -barHeight);

@@ -106,7 +106,19 @@ function generateRandomCircles(){
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");
     let level = amp.getLevel();
+        //I added audio spectrum bars
+        for (let i = 0; i < spectrum.length; i++){
+            let specVal = spectrum[i];
+            let barWidth = width / spectrum.length;
+            let barHeight = map(specVal, 0, 255, 0, height*0.5); 
 
+            let h = map(i, 0, spectrum.length, 0, 360);
+            fill((h + hueSlider.value() + random(-10, 10))%360, 80, 100, 80);
+
+            noStroke();
+            rect(i * barWidth, height, barWidth, -barHeight);
+
+        }
 
         for(let cp of randomCirclePosition){
             cp.angle += cp.speed * deltaTime;

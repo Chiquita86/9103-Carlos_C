@@ -1,6 +1,11 @@
-// I added a color palette extracted from the painting ‘Wheel of Fortune’ instead of random RGB
+/** 
+ * Color palette extracted from the painting 'Wheel of Fortune',
+ *  used to replace random RGB color generation for visual consistency.
+ */
 let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
-// I added a slider to adjust the hue and brightness of the image
+
+
+// Hue and brightness sliders implemented for interactive color adjustment
 let hueSlider, brightnessSlider;
 
 
@@ -14,7 +19,7 @@ let randomCirclePosition = [];//replace grid array
 
 /**
  * The following lines were taken from ChatGPT and examples like
- * "Drawing to Graphics Buffer" by Fabian Winkler (OpenProcessing.org, https://openprocessing.org/sketch/381081).
+ * "Drawing to Graphics Buffer" by Fabian Winkler (References:OpenProcessing.org, https://openprocessing.org/sketch/381081).
  * We want to create offscreen buffers (p5.Graphics) that store complex static graphics (zigzag circles or hand-drawn circles)
  * only once during setup(), and then reuse them in draw() to animate them. This boosts performance and creates a dynamic visual effect.
  * The process has multiple Steps. Each are commented below. 
@@ -90,9 +95,6 @@ function setup() {
 
     function draw() {
         background('#000000'); //background color can be adjust!!
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-
 
         for(let cp of randomCirclePosition){
             cp.angle += cp.speed * deltaTime;
@@ -101,7 +103,6 @@ function setup() {
             let offsetY = cos(millis() * cp.floatSpeedY + cp.floatPhaseY) * cp.floatAmplitude;
 
             push();
-            //translate(cp.x, cp.y);
             translate(cp.x + offsetX, cp.y + offsetY);
             rotate(cp.angle);
             imageMode(CENTER);
@@ -131,12 +132,11 @@ function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
     let outerMostRadius = maxRadius;
     for (let i = numLayers; i > 0; i--) {
         let radius = (i / numLayers) * maxRadius;
-        // I changed the fill to randomly pick from the palette instead of random RGB
+        // We changed the fill to randomly pick from the palette instead of random RGB
         let baseCol = color(random(palette));
         let newHue = (hue(baseCol)+hueSlider.value()+360) % 360;
         let newBrightness = brightness(baseCol) * (brightnessSlider.value()/100);
         g.fill(newHue, saturation(baseCol), newBrightness, 80);
-        //g.fill(color(random(palette) + 'ee'));
         g.noStroke();
         g.ellipse(cx + random(-1, 1), cy + random(-1, 1), radius * 2, radius * 2);
     }
@@ -160,7 +160,7 @@ function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
 /**
  * The following function was adapted from the original `drawZigzagPattern()`
  * in the reference code by Jera0420 (2024). 
- * Source: https://github.com/jera0420/jera0420_MajorProject
+ * References: https://github.com/jera0420/jera0420_MajorProject
  * This function uses trigonometric functions and vertex-based shape creation
  * (not covered in basic coding lessons). It creates a zigzag circle by alternating
  * between inner and outer radius vertex points in a polar coordinate system.
@@ -174,7 +174,7 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     let newHue = (hue(baseFillCol)+hueSlider.value()+360) % 360;
     let newBrightness = brightness(baseFillCol) * (brightnessSlider.value()/100);
         g.fill(newHue, saturation(baseFillCol), newBrightness, 80);
-    //g.fill(color(random(palette) + 'e0'));
+
     g.noStroke();
     g.circle(cx, cy, maxRadius * 2);
 
@@ -185,7 +185,7 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     let newHue1 = (hue(baseStrokeCol)+hueSlider.value()+360) % 360;
     let newBrightness1 = brightness(baseStrokeCol) * (brightnessSlider.value()/100);
         g.stroke(newHue1, saturation(baseStrokeCol), newBrightness1, 80);
-    //g.stroke(color(random(palette) + 'cc'));
+
     g.strokeWeight(random(3, 6));
 
     g.beginShape();
@@ -211,16 +211,18 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
         let newHue = (hue(baseDotCol)+hueSlider.value()+360) % 360;
         let newBrightness = brightness(baseDotCol) * (brightnessSlider.value()/100);
         g.fill(newHue, saturation(baseDotCol), newBrightness, 80);
-        //g.fill(color(random(palette)));
+
         g.noStroke();
         g.ellipse(x2, y2, 5, 5);
     }
 }
 
-// Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
-// https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
-// This version retains the original logic of avoiding overlap,
-// but integrates our own buffer drawing and animation properties.
+/** 
+ *  Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
+ * References:https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
+ * This version retains the original logic of avoiding overlap,
+ * but integrates our own buffer drawing and animation properties.
+ */
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 

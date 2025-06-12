@@ -4,6 +4,7 @@ let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f",
 let hueSlider, brightnessSlider;
 let needRedrawBuffers = true;
 let randomCirclePosition = [];//replace grid array
+
 let song, fft, amp; // I added p5.FFT() and p5.Amplitude（)
 
 function preload(){
@@ -24,7 +25,6 @@ function setup() {
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
 
-
     hueSlider = createSlider(-180, 180, 0);
     hueSlider.position(10, 10);
     hueSlider.style('width', '200px');
@@ -38,6 +38,7 @@ function setup() {
     //Audio analyzers
     fft = new p5.FFT();
     amp = new p5.Amplitude();
+
     //Create play/pause Button
     let playButton = createButton('Play/Pause');
     playButton.position(10, 70);
@@ -56,6 +57,7 @@ function generateRandomCircles(){
     randomCirclePosition = [];
     let circleNumber = 50;//circle number
     let tries = 0;
+    let buffer = 20; //set buffer distance to avoid over lapping
 
     while(randomCirclePosition.length < circleNumber && tries < 10000){//non-overlapping circles with random radius
         let r = random(30, 80);
@@ -65,7 +67,7 @@ function generateRandomCircles(){
         let overlapping = false;
         for(let cp of randomCirclePosition){
             let d = dist(x, y, cp.x, cp.y);
-            if(d < r +cp.r +2){//confirm the circles distance
+            if(d < r +cp.r +buffer){//confirm the circles distance
                 overlapping = true;
                 break;
             }
@@ -153,11 +155,13 @@ function generateRandomCircles(){
             push();
             //translate(cp.x, cp.y);
             translate(cp.x + offsetX, cp.y + offsetY);
+
             rotate(cp.angle + level * 5);
             imageMode(CENTER);
 
             let scaleFactor = map(bassEnergy, 0, 255, 0.8, 1.4);
             scale(scaleFactor);
+
             image(cp.pg, 0, 0);
             pop();
         }

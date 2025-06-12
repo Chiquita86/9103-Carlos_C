@@ -40,13 +40,17 @@ function setup() {
     volumeSlider = createSlider (0, 100, 50);
     volumeSlider.position(10, 70).style('width', '200px');
 
+    //Speed slider
+    speedSlider = createSlider (50, 200, 100);
+    speedSlider.position(10, 100).style('width', '200px');
+
     //Audio analyzers
     fft = new p5.FFT();
     amp = new p5.Amplitude();
 
     //Create play/pause Button
     let playButton = createButton('Play/Pause');
-    playButton.position(10, 100);
+    playButton.position(10, 130);
     playButton.mousePressed(() => {
         if(song.isPlaying()){
             song.pause();
@@ -111,6 +115,10 @@ function generateRandomCircles(){
     //set volume
     let volumeValue = volumeSlider.value() / 100.0;
     song.setVolume(volumeValue);
+
+    //set speed interaction
+    let speedValue = speedSlider.value() / 100.0;
+    song.rate(speedValue);
 
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");

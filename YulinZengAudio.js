@@ -124,9 +124,6 @@ function generateRandomCircles(){
     let panValue = map(mouseX, 0, width, -1, 1);
     song.pan(panValue);
 
-
-
-
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");
     let level = amp.getLevel();
@@ -158,17 +155,21 @@ function generateRandomCircles(){
             push();
             //translate(cp.x, cp.y);
             translate(cp.x + offsetX, cp.y + offsetY);
-
             rotate(cp.angle + level * 5);
             imageMode(CENTER);
 
+            //Add visual shape interaction to change size
             let scaleFactor = map(bassEnergy, 0, 255, 0.8, 1.4);
-            scale(scaleFactor);
-
+            let sideFactor = 1.0;
+            if(cp.x < width / 2){
+                sideFactor += map(panValue, -1, 1, 0.3, -0.3);
+            }else{
+                sideFactor += map(panValue, -1, 1, -0.3, 0.3);
+            }
+            scale(scaleFactor * sideFactor);
             image(cp.pg, 0, 0);
             pop();
         }
-
 
     if(needRedrawBuffers){
         for(let cp of randomCirclePosition){

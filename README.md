@@ -3,7 +3,6 @@
 # yzen0964_SID:550113469
 
 ---
-
 ## Introduction 
 This project is a secondary creation based on our team’s Wheels of Fortune artwork. Its core animation system is driven by audio and interaction, utilizing FFT and Amplitude analysis. The project was developed using p5.js, and was inspired by Pacita Abad’s Wheels of Fortune, which was the piece originally selected by our group at the beginning of the assignment.
 
@@ -56,15 +55,13 @@ The animation is driven by a combination of audio analysis (FFT and amplitude), 
 
 Below is an example showing the effect of interaction:
 
-![Adjusting sliders to explore color variations](./assets/adjusted_sliders.jpg)
-
 1.Choose Music
 ![chose music](./assets/chose.png)
 2.The circles change in response to the sound
-(./assets/fft.png)
+![Circles change](./assets/fft.png)
 3.Stereo panning changes
-(./assets/2.jpg)
-(./assets/4.jpg)
+![Stereo panning changes](./assets/2.jpg)
+![Stereo panning changes](./assets/4.jpg)
 
 ---
 
@@ -73,4 +70,10 @@ Below is an example showing the effect of interaction:
 - **If resizing the window**, the canvas and circles automatically adjust and re-render to fit the new size.
 - **If refreshing the page**, a new arrangement of circles will be generated, offering a fresh combination of positions, shapes, and textures.
 ---
+
+## Artwork Reference
+**Pacita Abad - 'Wheels of fortune'**
+![Artwork reference](./assets/Pacita_Abad_Wheels_of_fortune.jpg)
+
 ## Reference  
+

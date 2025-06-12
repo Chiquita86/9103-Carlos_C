@@ -92,7 +92,7 @@ function setup() {
         angle: cp.angle,
         speed: cp.speed,
         floatPhaseX: cp.floatPhaseX,
-        floatSpeedY: cp.floatPhaseY,
+        floatPhaseY: cp.floatPhaseY,
         floatSpeedX: cp.floatSpeedX,
         floatSpeedY: cp.floatSpeedY,
         floatAmplitude: cp.floatAmplitude
@@ -514,6 +514,7 @@ function keyPressed(){
 
     if(key ==='3'){
         randomCirclePosition = initialState.map(cp => {
+            let r = cp.originalR;
             let pg = createGraphics(cp.r * 2, cp.r * 2);
             pg.colorMode(HSB, 360, 100, 100);
             pg.clear();
@@ -526,7 +527,9 @@ function keyPressed(){
 
             return{
                 ...cp,
-                pg: pg
+                pg: pg,
+                x: cp.x,
+                y: cp.y,
             };
         });
     }

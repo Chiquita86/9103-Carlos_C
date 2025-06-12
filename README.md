@@ -77,3 +77,15 @@ Below is an example showing the effect of interaction:
 
 ## Reference  
 
+The following links were used as references during my learning process.
+- [Adds a vertex to a custom shape](https://p5js.org/reference/p5/vertex/)
+- [Oscillation](https://natureofcode.com/oscillation/)
+- [How to use the sin() function in p5.js to simulate simple harmonic motion](https://codingtrain.github.io/website-archive/learning/nature-of-code/3.5-simple-harmonic-motion.html)
+- [How to create Animation of Sine Wave Pattern using p5.js](https://www.geeksforgeeks.org/javascript/how-to-create-animation-of-sine-wave-pattern-using-p5-js/)
+- [Create Slider](https://p5js.org/reference/p5/createSlider/)
+- [Hue](https://p5js.org/reference/p5/hue/)
+- [Brightness](https://p5js.org/reference/p5/brightness/)
+- [Lightness](https://p5js.org/reference/p5/lightness/)
+- [FFTAnalyze](https://p5js.org/reference/p5.FFT/analyze/)
+- [p5.Amplitude](https://p5js.org/reference/p5.sound/p5.Amplitude/)
+

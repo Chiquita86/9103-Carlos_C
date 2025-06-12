@@ -89,6 +89,8 @@ function setup() {
         let selectedIndex = songSelect.value();
         song = loadSound(songFiles[selectedIndex], () => {
             song.play();
+            generateRandomCircles();
+            needRedrawBuffers = true;
         });
     });
 

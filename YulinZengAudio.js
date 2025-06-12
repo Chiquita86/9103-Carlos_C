@@ -120,6 +120,13 @@ function generateRandomCircles(){
     let speedValue = speedSlider.value() / 100.0;
     song.rate(speedValue);
 
+    //Add stereo panning with mouse position
+    let panValue = map(mouseX, 0, width, -1, 1);
+    song.pan(panValue);
+
+
+
+
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");
     let level = amp.getLevel();

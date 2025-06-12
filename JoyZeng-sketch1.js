@@ -62,14 +62,20 @@ let waveMaxR; // max radius
 const fadeAlpha = 10; //fade alpha for trails
 
 // Global gradient buffer updated on resize// Changed the local gradient variable to a global waveGradient to allow direct use in draw.
-let waveGradient;
-let midStop; // gradient midpoint stop value
+//let waveGradient;
+//let midStop; // gradient midpoint stop value
+
+// Dynamic gradient parameters
+let gradPhase; // holds noise phase for gradient
+let currentMid = 0.5; ;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
     noiseDetail(2, 0.5); //Perlin noise detail
+    // Initialize dynamic gradient phase, random seed for noise-driven gradient
+    gradPhase = random(1000);
     textFont('Indie Flower'); //font set
     textAlign(CENTER, CENTER); //center text alignment
 
@@ -189,6 +195,17 @@ function initCircles() {
 
     //Main draw loop
     function draw() {
+        //Dynamic gradient via Perlin noise, recalc gradient mid-point each frame
+        let tGrad = millis() * 0.002; // time-based noise input
+        let rawNoise = noise(tGrad + gradPhase);
+        let midTarget= 0.5 + (rawNoise - 0.5) * 0.8;
+        currentMid   = lerp(currentMid, midTarget, 0.1);
+        waveGradient = drawingContext.createLinearGradient(0,0,width,0);
+        waveGradient.addColorStop(0, '#87dfd6');
+        waveGradient.addColorStop(currentMid, '#01a9b4');
+        waveGradient.addColorStop(1, '#01a9b4');
+        drawingContext.fillStyle = waveGradient;
+
         background('#87dfd6'); //background color change
 
         // Bottom layer: Blobby Wave
@@ -217,6 +234,11 @@ function initCircles() {
     yoff += 0.01;  //advance noise to over time
 
     //Midder Layer: Colorcircle layer
+        drawingContext.save();
+        drawingContext.shadowOffsetX = 5;
+        drawingContext.shadowOffsetY = 10;
+        drawingContext.shadowBlur    = 15;
+        drawingContext.shadowColor   = 'black';
         let t = millis()*0.001; //Add Time for noise()
 
         for(let cp of randomCirclePosition){
@@ -233,7 +255,8 @@ function initCircles() {
             image(cp.pg, 0, 0);
             pop();
         }
-
+        drawingContext.restore();
+    
     //Redraw buffers only if necessary
     // Update the colorcircle details in offscreen buffers based on noise
     if(needRedrawBuffers){
@@ -274,6 +297,10 @@ function initCircles() {
  *    Class‐based particles emitted over time, with each draw cycle overlaying a low‐alpha background to fade previous frames.
  */
     //Top Layer: Particle Trails
+    // Close the shadow of the main canvas and draw the top layer particles
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+    drawingContext.shadowBlur    = 0;
     drawingContext.shadowColor = 'transparent';
     //Step 1: Fade out previous frame’s trails by drawing a low-alph rectangle over the entire buffer with 'destination-out' mode.
     let ctx = waveLayer.drawingContext;

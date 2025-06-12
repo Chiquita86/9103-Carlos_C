@@ -66,7 +66,7 @@ function generateRandomCircles(){
     randomCirclePosition = [];
     let circleNumber = 50;//circle number
     let tries = 0;
-    let buffer = 20; //set buffer distance to avoid over lapping
+    let buffer = 30; //set buffer distance to avoid over lapping
 
     while(randomCirclePosition.length < circleNumber && tries < 10000){//non-overlapping circles with random radius
         let r = random(30, 80);
@@ -111,12 +111,23 @@ function generateRandomCircles(){
 
     function draw() {
         background('#000000'); //background color can be adjust!!
+
+    //Add wave background animation
+    noFill();
+    stroke(255, 10, 100, 10);
+    strokeWeight(0.1);
+    let waveCount = 75;
+    let maxRadius = max(width, height);
+    for(let i = 0; i < waveCount; i++){
+        let offset = i * 20 + (millis() * 0.01) % 60;
+        ellipse(width/2, height/2, maxRadius - offset);
+    }
     
-    //set volume
+    //Set volume
     let volumeValue = volumeSlider.value() / 100.0;
     song.setVolume(volumeValue);
 
-    //set speed interaction
+    //Set speed interaction
     let speedValue = speedSlider.value() / 100.0;
     song.rate(speedValue);
 

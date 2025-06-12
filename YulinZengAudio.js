@@ -99,47 +99,9 @@ function generateRandomCircles(){
         tries++;
       }
     }
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-    // let numCols = 8;
-    // let numRows = 5; //I change the line to make symmetry
-    // let layers = 12; //I adjust a liitle bit to make it more colorful
-    // let maxRadius = min(gridSizeX, gridSizeY) * 0.5; //I adjust a liitle bit
-
-    // Initialize angles, speeds, and offscreen buffers
-    //for (let r = 0; r < numRows; r++) {
-      //  angles[r]  = [];
-       //speeds[r]  = [];
-       // buffers[r] = [];
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            // angle and speed
-            //angles[r][c] = random(TWO_PI);
-            //let arcPerSec = random(TWO_PI/90, TWO_PI/45);  // speed can be adjusted  
-            //speeds[r][c] = arcPerSec / 1000 * (random() < 0.5 ? 1 : -1);
-
-            // Offscreen layer caching: draw each static circle once onto a p5.Graphics (PG)
-            // Offscreen layer strategy (osteele, 2022), see appendix.
-            // let pg = createGraphics(gridSizeX, gridSizeY);
-            // pg.clear();
-            // pg.noStroke();
-            // let cx = gridSizeX/2, cy = gridSizeY/2;
-            // if (random(1) < 0.2) {
-            //     drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            // } else {
-            //     drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            // buffers[r][c] = pg; // store PG for this cell
-        //}
-    //}
-     //rebuildBuffers();
-//}
 
     function draw() {
         background('#000000'); //background color can be adjust!!
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
 
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");
@@ -181,28 +143,6 @@ function generateRandomCircles(){
         needRedrawBuffers = false;
         }
     }
-       // rebuildBuffers();
-       // needRedrawBuffers = false;
-    //}
-
-      // for (let r = 0; r < numRows; r++) {
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-       // for (let c = startCol; c < numCols; c++) {
-            //let cx = c * gridSizeX + gridSizeX/2 + offset;
-            //let cy = r * gridSizeY + gridSizeY/2;
-
-            // update angle
-            //angles[r][c] += speeds[r][c] * deltaTime;
-
-            //push();
-            //translate(cx, cy);
-            //rotate(angles[r][c]);
-            //imageMode(CENTER);
-            //image(buffers[r][c], 0, 0);
-           // pop();
-        //}
 
 // PG: drawHandDrawnCircle
 function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
@@ -295,41 +235,9 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     }
 }
 
-//function rebuildBuffers() {
-    //let gridSizeX = width / numCols;
-    //let gridSizeY = height / numRows;
-    
-    //let layers = 12;
-    //let maxRadius = min(gridSizeX, gridSizeY) * 0.5;
-
-   // for (let r = 0; r < numRows; r++) {
-        //buffers[r] = [];
-        //let offset = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            //let pg = createGraphics(gridSizeX, gridSizeY);
-            //pg.colorMode(HSB, 360, 100, 100);
-            //pg.clear();
-            //pg.noStroke();
-            //let cx = gridSizeX / 2;
-            //let cy = gridSizeY / 2;
-
-            //if (random(1) < 0.2) {
-                //drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            //} else {
-                //drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            //}
-            //buffers[r][c] = pg;
-        //}
-    //}
-//}
-
 // //buffers can be rebuilt if necessary
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight); 
-//     //redraw();
-//     needRedrawBuffers = true;
 
     randomCirclePosition = [];
     let count = 50;

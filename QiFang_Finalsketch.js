@@ -254,6 +254,8 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
 
 // //buffers can be rebuilt if necessary
 function windowResized() {
+    let angle = random(TWO_PI);
+    let speed = random([-1, 1]) * random(PI / 6000, PI / 3000);
     resizeCanvas(windowWidth, windowHeight); 
 //     //redraw();
 //     needRedrawBuffers = true;
@@ -290,8 +292,8 @@ function windowResized() {
         x, y, r, 
         originalR: r,
         pg,
-        angle,
-        speed,
+        angle: angle,
+        speed: speed,
         floatPhaseX: random(TWO_PI),
         floatPhaseY: random(TWO_PI),
         floatSpeedX: random(0.001, 0.005),

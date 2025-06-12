@@ -96,8 +96,8 @@ function draw() {
     let birdOffsetX = 180;
     let birdOffsetY = -180;
     let scaleRatio = 0.15;
-    let birdX = mouseX + birdOffsetX;
-    let birdY = mouseY + birdOffsetY;
+    let birdX = constrain(mouseX + birdOffsetX, 0, width);
+    let birdY = constrain(mouseY + birdOffsetY, 0, height);
 
         for(let cp of randomCirclePosition){
             cp.angle += cp.speed * deltaTime; // according to the speed to upload the angle
@@ -113,8 +113,8 @@ function draw() {
             //control the distance of circle push away
             if (distance < 150){
                 let force = (150 - distance) * 0.25;
-                cp.x += dx / distance * force;
-                cp.y += dy / distance * force;
+                cp.x = constrain(cp.x + dx / distance * force, cp.r, width - cp.r);
+                cp.y = constrain(cp.y + dy / distance * force, cp.r, height - cp.r);
             }
 
             push();//Save the current coordinate system state
@@ -337,9 +337,9 @@ function mousePressed(){
                 }
 
         //merge new circle
-        let newX = (a.x + b.x) / 2;
-        let newY = (a.y + b.y) / 2;
-        let newR = sqrt(a.r * a.r + b.r * b.r);
+        let newX = constrain((a.x + b.x) / 2, newR, width - newR);
+        let newY = constrain((a.y + b.y) / 2, newR, height - newR);
+        
 
         //Creating a new buffered image
         let pg = createGraphics(newR * 2, newR * 2);

@@ -24,16 +24,21 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
-
+    //Hue slider
     hueSlider = createSlider(-180, 180, 0);
     hueSlider.position(10, 10);
     hueSlider.style('width', '200px');
     hueSlider.input(()=> needRedrawBuffers = true);
 
+    //Brightness slider
     brightnessSlider = createSlider(50, 150, 100);
     brightnessSlider.position(10, 40);
     brightnessSlider.style ('width', '200px');
     brightnessSlider.input(()=> needRedrawBuffers = true);
+
+    //Volume slider
+    volumeSlider = createSlider (0, 100, 50);
+    volumeSlider.position(10, 70).style('width', '200px');
 
     //Audio analyzers
     fft = new p5.FFT();
@@ -41,7 +46,7 @@ function setup() {
 
     //Create play/pause Button
     let playButton = createButton('Play/Pause');
-    playButton.position(10, 70);
+    playButton.position(10, 100);
     playButton.mousePressed(() => {
         if(song.isPlaying()){
             song.pause();
@@ -102,6 +107,10 @@ function generateRandomCircles(){
 
     function draw() {
         background('#000000'); //background color can be adjust!!
+    
+    //set volume
+    let volumeValue = volumeSlider.value() / 100.0;
+    song.setVolume(volumeValue);
 
     let spectrum = fft.analyze();
     let bassEnergy = fft.getEnergy("bass");

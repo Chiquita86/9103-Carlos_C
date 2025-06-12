@@ -49,26 +49,50 @@ let randomCirclePosition = []; //replace grid array
 //The Blobby wave parameter of the bottom layer
 let yoff = 0; //Perlin noise offset used to drive waves
 
+//Added Particle Trails
+//Particle text-trail variables: char array, spawn index, offscreen layer, grid & particles
+let chars, spawnIdx = 0;
+let waveLayer;
+let waveGrid = [], waveParticles = [];
+const spacing = 24; //grid spacing
+const noiseAmp = 40; //noise amplitude
+const waveSpeed = 4.0; //wave expansion speed
+let waveFrame = 0; //current frame count
+let waveMaxR; // max radius
+const fadeAlpha = 10; //fade alpha for trails
+
+// Global gradient buffer updated on resize// Changed the local gradient variable to a global waveGradient to allow direct use in draw.
+let waveGradient;
+let midStop; // gradient midpoint stop value
+
 function setup() {
     createCanvas(windowWidth, windowHeight);
     // noLoop(); // kept from original, but commented out so draw() loops for continuous rotation
     colorMode(HSB, 360, 100, 100);
+    noiseDetail(2, 0.5); //Perlin noise detail
+    textFont('Indie Flower'); //font set
+    textAlign(CENTER, CENTER); //center text alignment
 
-    //The Blobby wave: shadow and gradient
-      drawingContext.shadowOffsetX = 5;
-      drawingContext.shadowOffsetY = 10;
-      drawingContext.shadowBlur = 15;
-      drawingContext.shadowColor = 'black';
+    //Build gradients
+    // Changed to the dynamic gradient build
+    midStop = random(0.3, 0.7);
+    waveGradient = drawingContext.createLinearGradient(0, 0, width, 0);
+    waveGradient.addColorStop(0, '#87dfd6');
+    waveGradient.addColorStop(midStop, '#01a9b4');
+    waveGradient.addColorStop(1, '#01a9b4');
 
-      // Create a horizontal linear gradient background for wave filling
-      let c1 = '#87dfd6';
-      let c2 = '#01a9b4';
-      let c3 = '#01a9b4';
-      let gradient = drawingContext.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0.0, c1);
-      gradient.addColorStop(random(0.3,0.7), c2); //Switch colors at random in the middle section
-      gradient.addColorStop(1.0, c3);
-      drawingContext.fillStyle = gradient;
+    //Added the text-Particle Trails
+    chars = [
+        "Ocean","Footprints","Leaving","Staying","Echo","Life", "Love",
+        "circle of life","Wheels of fortune","Journey","Color",
+        "Destiny","Pacita Abad","Poem","Beating","Heart","Thinking",
+    ].join(" ").split("");
+
+      initCircles(); //init floating circles
+      waveLayer = createGraphics(width, height); //create offscreen layer
+      waveLayer.clear(); //clear offscreen
+      initWave(); //init particle grid
+    }
 
     /**
     * This section of code creates sliders to allow interactive adjustment of hue and brightness.
@@ -82,57 +106,7 @@ function setup() {
     //Delete slider for focusing on my individuel part. Perlin noise and randomness
     //I want to use noise() drives the fine-tuning of radius, the number of layers, position jitter, and hue/brightness
 
-    //Randomly place non-overlapping circles on the canvas and cache in offscreen buffers
-    let circleNumber = 80; //circle number //changed from 50 to 100
-    let tries = 0;
-
-    while(randomCirclePosition.length < circleNumber && tries < 10000){//non-overlapping circles with random radius
-        let r = random(30, 80);
-        let x = random(r, width - r);
-        let y = random(r, height - r);
-
-        // Collision Detection
-        let overlapping = false;
-        for(let cp of randomCirclePosition){
-            let d = dist(x, y, cp.x, cp.y);
-            if(d < r +cp.r +2){ //confirm the circles distance
-                overlapping = true;
-                break;
-            }
-        }
-
-        if (!overlapping){
-            let padding = 20; // Added padding for offscreen buffer, prevent edge cutting
-            let pg = createGraphics((r+padding)*2, (r+padding)*2);
-            pg.colorMode(HSB, 360, 100, 100);
-            pg.clear();
-
-            //20% drawing in the zigzag style; otherwise, in the hand-drawn style
-            if(random(1) <  0.2){
-                drawZigzagCircleOn(pg, r+padding, r+padding, 10, r * 0.9);
-            }else{
-                drawHandDrawnCircleOn(pg, r+padding, r+padding, 10, r * 0.9);
-            }
-
-            let angle = random(TWO_PI);
-            let speed = random([-1, 1]) * random(PI / 6000, PI / 3000);
-
-            //Use noise() to drive
-            randomCirclePosition.push({
-                x, y, r, pg, angle, speed,
-                floatPhaseX: random(TWO_PI), //Noise phase for jitter
-                floatPhaseY: random(TWO_PI),
-                floatSpeedX: random(0.001, 0.005),
-                floatSpeedY: random(0.001, 0.005),
-                floatAmplitude: random(5, 20), //change the value, expand the floating range
-                noisePhase: random(1000), //add noise offset for radius/layers/hue
-            });
-        }
-        tries++;
-      }
-    }
-
-    /** 
+/** 
  *  Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
  * References:https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
  * This version retains the original logic of avoiding overlap,
@@ -142,39 +116,48 @@ function setup() {
     function windowResized() {
         resizeCanvas(windowWidth, windowHeight);
 
-    // Reset the gradient to fit the new width
-    let c1 = '#87dfd6', c2 = '#01a9b4', c3 = '#01a9b4';
-    let gradient = drawingContext.createLinearGradient(0, 0, width, 0);
-    gradient.addColorStop(0.0, c1);
-    gradient.addColorStop(random(0.3,0.7), c2);
-    gradient.addColorStop(1.0, c3);
-    drawingContext.fillStyle = gradient;
-    
-    // Clear the old color circle data and regenerate it
+    // Rebuilt the gradient to fit the new width
+     midStop = random(0.3, 0.7);
+     waveGradient = drawingContext.createLinearGradient(0, 0, width, 0);
+     waveGradient.addColorStop(0, '#87dfd6');
+     waveGradient.addColorStop(midStop, '#01a9b4');
+     waveGradient.addColorStop(1, '#01a9b4');
+
+       initCircles(); //reset circles
+       waveLayer.resizeCanvas(width, height); //resize offscreen
+       initWave(); //reset particle grid
+    }
+
+    // Initialize non-overlapping floating circles with offscreen buffers
+function initCircles() {
     randomCirclePosition = [];
     let circleNumber = 80, tries = 0;
     while (randomCirclePosition.length < circleNumber && tries < 10000) {
     let r = random(30, 80);
     let x = random(r, width - r);
     let y = random(r, height - r);
-    if (!randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < cp.r + r + 2)) {
+    //collision detection
+    let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < r + cp.r + 2);
+    if (!overlap) {
       let padding = 20;
-      let pg = createGraphics((r + padding)*2, (r + padding)*2);
+      let pg = createGraphics((r + padding) * 2, (r + padding) * 2);
       pg.colorMode(HSB, 360, 100, 100);
       pg.clear();
+      //choose 20% chance be zigzag style, otherwise hand drawn
+      if (random(1) < 0.2) drawZigzagCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
+      else  drawHandDrawnCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
       randomCirclePosition.push({
         x, y, r, pg,
-        angle: random(TWO_PI),
-        speed: random([-1,1]) * random(PI/6000, PI/3000),
-        floatPhaseX: random(TWO_PI),
-        floatPhaseY: random(TWO_PI),
-        floatAmplitude: random(5,20),
-        noisePhase: random(1000),
+        angle: random(TWO_PI), speed: random([-1,1]) * random(PI/6000, PI/3000),
+        floatPhaseX: random(TWO_PI), 
+        floatPhaseY: random(TWO_PI), 
+        floatAmplitude: random(5,20), 
+        noisePhase: random(1000)
       });
     }
     tries++;
   }
-  needRedrawBuffers = true;
+  needRedrawBuffers = true; // mark buffers for redraw
 }
 
     /**
@@ -204,12 +187,18 @@ function setup() {
      * Finally, I map noiseVal into strokeWeight, letting outlines ebb and flow in thickness just like in nature.
      */
 
-    //Blobby Wave: Multiple wave shapes are generated using noise(), and the frequency of each wave increases
+    //Main draw loop
     function draw() {
         background('#87dfd6'); //background color change
-        noStroke();
-        drawingContext.fill();
 
+        // Bottom layer: Blobby Wave
+        //Blobby Wave: Multiple wave shapes are generated using noise(), and the frequency of each wave increases
+        noStroke();
+        drawingContext.shadowOffsetX = 5;
+        drawingContext.shadowOffsetY = 10;
+        drawingContext.shadowBlur = 15;
+        drawingContext.shadowColor = 'black';
+        drawingContext.fillStyle = waveGradient;
         for (let i = height * 0.3; i < height; i += height * 0.1) {
             beginShape();
             let xoff = i / 10;  //The row offset, starting point of noise sampling
@@ -225,20 +214,20 @@ function setup() {
         vertex(width, height);
         endShape(CLOSE);
     }
-    yoff += 0.01;  //add time dimension of noise to form animation
+    yoff += 0.01;  //advance noise to over time
 
-        //Colorcircle layer on the Blobby wave layer
+    //Midder Layer: Colorcircle layer
         let t = millis()*0.001; //Add Time for noise()
 
         for(let cp of randomCirclePosition){
             cp.angle += cp.speed * deltaTime; //use spin
 
             //Position jitter via noise
-            let offsetX = sin(t + cp.floatPhaseX) * cp.floatAmplitude;
-            let offsetY = cos(t + cp.floatPhaseY) * cp.floatAmplitude;
+            let ox = sin(t + cp.floatPhaseX) * cp.floatAmplitude;
+            let oy = cos(t + cp.floatPhaseY) * cp.floatAmplitude;
 
             push();
-            translate(cp.x + offsetX, cp.y + offsetY);
+            translate(cp.x + ox, cp.y + oy);
             rotate(cp.angle);
             imageMode(CENTER);
             image(cp.pg, 0, 0);
@@ -263,8 +252,122 @@ function setup() {
             }
         }
         needRedrawBuffers = false; //Reset flag
-        }
     }
+
+/**
+ * For Particle Trails + Fading Residuals:
+ *  * The following annotation was drafted with assistance from ChatGPT:
+ *    ChatGPT helped outline the offscreen buffer setup and frame-by-frame fade logic.
+ * 
+ * References
+ * Inspired by multiple implementations of offscreen buffering and alpha‐masked background overlays:
+ * 1. Inspired by "Blow up the seawater" by Sihua post on xiaohongshu
+ *    https://www.xiaohongshu.com/explore/682237ab000000002202fe5e?xsec_token=ABv224DgIC6Rt_NdFakhH5PIlXnh3omjqhokkjiBsXNcw=&xsec_source=pc_user
+ * 2. Fading trailing stroke in p5.js” (StackOverflow Q&A)
+ *    https://stackoverflow.com/questions/49545643/fading-trailing-stroke-in-p5-js
+ *    Demonstrates drawing a translucent background (or rect) each frame to gradually erase older strokes.
+ * 3. "Flow_Fields" by Aditi on openprocessing (sketch 2306239)
+ *    https://openprocessing.org/sketch/2306239
+ *    Interactive particle system using Perlin noise, with a semi‐transparent background for smooth fading trails.
+ * 4. Smoke Particle System (p5.js official example)
+ *    https://p5js.org/examples/math-and-physics-smoke-particle-system/
+ *    Class‐based particles emitted over time, with each draw cycle overlaying a low‐alpha background to fade previous frames.
+ */
+    //Top Layer: Particle Trails
+    drawingContext.shadowColor = 'transparent';
+    //Step 1: Fade out previous frame’s trails by drawing a low-alph rectangle over the entire buffer with 'destination-out' mode.
+    let ctx = waveLayer.drawingContext;
+    ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+    waveLayer.noStroke(); waveLayer.fill(0, fadeAlpha);
+    waveLayer.rect(0,0,width,height);
+    ctx.restore(); ctx.globalCompositeOperation = 'source-over';
+    
+    let baseR = (waveFrame*waveSpeed)%waveMaxR;
+    let tt = waveFrame*0.005;
+    for (let cell of waveGrid) { 
+    if (!cell.dead) {
+      let d = dist(cell.x,cell.y,0,0);
+      let ang01 = (atan2(cell.y,cell.x)/TWO_PI + 1)%1;
+      let off = (noise(ang01*3, tt)-0.5)*noiseAmp;
+      if (d < baseR + off) {
+        cell.dead = true;
+        let n = floor(random(6,12));
+        for (let i = 0; i < n; i++) waveParticles.push(new DotParticle(cell.x, cell.y));
+        let ch = chars[spawnIdx++ % chars.length];
+        waveParticles.push(new LetterParticle(cell.x, cell.y, ch));
+      }
+    }
+  }
+
+  //Step 2: Draw/update all new particles into the offscreen buffer.
+  for (let i = waveParticles.length-1; i>=0; i--) {
+    let p = waveParticles[i]; p.update(); p.show(waveLayer);
+    if (p.dead) waveParticles.splice(i,1);
+  }
+  waveFrame++;
+  //Step 3: Composite the offscreen buffer onto the main canvas.
+  image(waveLayer,0,0);
+  if (waveGrid.every(c=>c.dead)&&waveParticles.length===0) initWave();
+}
+
+//initialize grid for particle emission
+function initWave() {
+  waveGrid=[]; waveParticles=[]; waveFrame=0;
+  waveMaxR = sqrt(sq(width)+sq(height));
+  for (let y = spacing/2; y < height; y += spacing) {
+    for (let x = spacing/2; x < width; x += spacing) {
+      waveGrid.push({x,y,dead:false});
+    }
+  }
+}
+
+//Dot particle class for small dots
+class DotParticle {
+  constructor(x,y){
+    this.pos=createVector(x,y);
+    this.life=random(150,255);
+    this.size=random(6,14);
+    this.col = random()<0.2? [60,255,255] : [255,255,255];
+    this.dead=false;
+  }
+  update(){
+    let a = noise(this.pos.x*0.005,this.pos.y*0.005,waveFrame*0.004)*TWO_PI*4;
+    this.pos.add(p5.Vector.fromAngle(a).mult(random(1,3)));
+    this.life-=5; this.size*=0.96;
+    if(this.life<=0||this.size<0.5) this.dead=true;
+  }
+  show(pg){
+    pg.colorMode(RGB,255); pg.noStroke();
+    pg.fill(this.col[0],this.col[1],this.col[2],this.life);
+    pg.ellipse(this.pos.x,this.pos.y,this.size);
+  }
+}
+
+//Letter particle class for text chars
+class LetterParticle {
+  constructor(x,y,ch){
+    this.pos=createVector(x,y);
+    this.life=255;
+    this.size=random(16,32);
+    this.ch=ch;
+    this.noff=random(1000);
+    this.dead=false;
+  }
+  update(){
+    let a = noise(this.pos.x*0.005,this.pos.y*0.005,waveFrame*0.004+1000)*TWO_PI*2;
+    this.pos.x+=cos(a)*1.5; this.pos.y+=sin(a)*1.5;
+    this.life-=4; this.size*=0.98;
+    if(this.life<=0||this.size<4) this.dead=true;
+  }
+  show(pg){
+    pg.push(); pg.translate(this.pos.x,this.pos.y);
+    pg.rotate(noise(this.noff,waveFrame*0.004)*0.6-0.3);
+    pg.noStroke(); pg.fill(60,255,255,this.life*0.7);
+    pg.textSize(this.size);
+    pg.text(this.ch,0,0);
+    pg.pop();
+  }
+}
 
     // PG: drawHandDrawnCircle //added noiseVal
     function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, noiseVal = 0.5){

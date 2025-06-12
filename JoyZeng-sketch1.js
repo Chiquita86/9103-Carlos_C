@@ -1,23 +1,18 @@
-// I added a color palette extracted from the painting ‘Wheel of Fortune’ instead of random RGB
-let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
+// I added a color palette extracted from the painting ‘Wheel of Fortune’ instead of random RGB 
+let palette = [
+    "#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", 
+    "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 // I added a slider to adjust the hue and brightness of the image
 
 //Remove Hue and Brightness Sliders and Revert to Static HSB Color Rendering
-//delete: let hueSlider, brightnessSlider;
+//delete: let hueSlider, brightnessSlider; 
 
 /**
  * I use the needRedrawBuffers flag and buffers to avoid redrawing everything on every frame, rebuilding caches only when necessary.
  * Reference: https://p5js.org/reference/p5/redraw/
  */
-let needRedrawBuffers = true;
+let needRedrawBuffers = true; //Added flag for noise-driven redraw
 let randomCirclePosition = [];//replace grid array
-
-//I add the buffer for spin
-//const numCols = 8;
-//const numRows = 5;
-//let angles = [];   //store the current angle of each circle
-//let speeds = [];   //store the current spin speed of each circle
-//let buffers = [];  // add off-screen layer caching
 
 /**
  * The following lines were taken from ChatGPT and examples like
@@ -40,20 +35,10 @@ function setup() {
         *  https://p5js.org/reference/p5/brightness/
         *  https://p5js.org/reference/p5/lightness/
     */
-   
     //Delete slider for focusing on my individuel part. Perlin noise and randomness
     //I want to use noise() drives the fine-tuning of radius, the number of layers, position jitter, and hue/brightness
-    //delete: hueSlider = createSlider(-180, 180, 0);
-    //delete: hueSlider.position(10, 10);
-    //delete: hueSlider.style('width', '200px');
-    //delete: hueSlider.input(()=> needRedrawBuffers = true);
 
-    //delete: brightnessSlider = createSlider(50, 150, 100);
-    //delete: brightnessSlider.position(10, 40);
-    //delete: brightnessSlider.style ('width', '200px');
-    //delete: brightnessSlider.input(()=> needRedrawBuffers = true);
-
-    let circleNumber = 100; //circle number //change to 100
+    let circleNumber = 100; //circle number //changed from 50 to 100
     let tries = 0;
 
     while(randomCirclePosition.length < circleNumber && tries < 10000){//non-overlapping circles with random radius
@@ -61,6 +46,7 @@ function setup() {
         let x = random(r, width - r);
         let y = random(r, height - r);
 
+        // Collision Detection
         let overlapping = false;
         for(let cp of randomCirclePosition){
             let d = dist(x, y, cp.x, cp.y);
@@ -71,79 +57,72 @@ function setup() {
         }
 
         if (!overlapping){
-            let pg = createGraphics(r * 2, r * 2);
+            let padding = 20; // Added padding for offscreen buffer, prevent edge cutting
+            let pg = createGraphics((r+padding)*2, (r+padding)*2);
             pg.colorMode(HSB, 360, 100, 100);
             pg.clear();
 
             if(random(1) <  0.2){
-                drawZigzagCircleOn(pg, r, r, 10, r * 0.9);
+                drawZigzagCircleOn(pg, r+padding, r+padding, 10, r * 0.9);
             }else{
-                drawHandDrawnCircleOn(pg, r, r, 10, r * 0.9);
+                drawHandDrawnCircleOn(pg, r+padding, r+padding, 10, r * 0.9);
             }
 
             let angle = random(TWO_PI);
             let speed = random([-1, 1]) * random(PI / 6000, PI / 3000);
 
+            //Use noise() to drive
             randomCirclePosition.push({
                 x, y, r, pg, angle, speed,
-                floatPhaseX: random(TWO_PI),
+                floatPhaseX: random(TWO_PI), //Noise phase for jitter
                 floatPhaseY: random(TWO_PI),
                 floatSpeedX: random(0.001, 0.005),
                 floatSpeedY: random(0.001, 0.005),
-                floatAmplitude: random(1, 8)
+                floatAmplitude: random(5, 20), //change the value, expand the floating range
+                noisePhase: random(1000), //add noise offset for radius/layers/hue
             });
         }
         tries++;
       }
     }
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-    // let numCols = 8;
-    // let numRows = 5; //I change the line to make symmetry
-    // let layers = 12; //I adjust a liitle bit to make it more colorful
-    // let maxRadius = min(gridSizeX, gridSizeY) * 0.5; //I adjust a liitle bit
 
-    // Initialize angles, speeds, and offscreen buffers
-    //for (let r = 0; r < numRows; r++) {
-      //  angles[r]  = [];
-       //speeds[r]  = [];
-       // buffers[r] = [];
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            // angle and speed
-            //angles[r][c] = random(TWO_PI);
-            //let arcPerSec = random(TWO_PI/90, TWO_PI/45);  // speed can be adjusted  
-            //speeds[r][c] = arcPerSec / 1000 * (random() < 0.5 ? 1 : -1);
-
-            // Offscreen layer caching: draw each static circle once onto a p5.Graphics (PG)
-            // Offscreen layer strategy (osteele, 2022), see appendix.
-            // let pg = createGraphics(gridSizeX, gridSizeY);
-            // pg.clear();
-            // pg.noStroke();
-            // let cx = gridSizeX/2, cy = gridSizeY/2;
-            // if (random(1) < 0.2) {
-            //     drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            // } else {
-            //     drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            // buffers[r][c] = pg; // store PG for this cell
-        //}
-    //}
-     //rebuildBuffers();
-//}
+    /**
+     * For my Individual Task: Perlin noise and randomness
+     * I trying to drive multiple parameters—position jitter, radius variation, layer count, hue/brightness shifts, and stroke weight—using Perlin Noise for smooth, natural motion.
+    
+    * I drew inspiration and references from:
+     * 1. Daniel Shiffman’s “Intro to Perlin Noise,” Part I.2, which shows how p5.js’s noise() can generate continuously varying random values to animate parameters.  
+     * https://thecodingtrain.com/tracks/the-nature-of-code-2/noc/perlin/intro-to-perlin-noise/
+     * 2. “Flow Fields and Noise Algorithms with p5.js” by Tom Holloway , 
+     * demonstrating the use of 3D Perlin Noise to control particle flow fields and color variation—analogous to my multi-layer noise-driven graphics approach.  
+     * Sample noise(x * scale, y * scale, z) to get an angle at each point.
+     * Convert that to a vector (cos(angle), sin(angle)) to drive particle motion.
+     * Use the third dimension z (often means time) to animate over frames.
+     * https://dev.to/nyxtom/flow-fields-and-noise-algorithms-with-p5-js-5g67
+     * 3. The Coding Train’s “Perlin Noise Flow Field” example, which applies noise() to generate smooth directional offsets for position and rotation in a flow field.  
+     * Maintain an array of “particles” each with a position and velocity.
+     * At each update, sample angle = TAU * noise(px * inc, py * inc, t).
+     * vx = cos(angle) * speed; vy = sin(angle) * speed. Using (vx, vy) to particle position for natural, flowing movement.
+     * https://editor.p5js.org/codingtrain/sketches/vDcIAbfg7
+     
+    * 4. Using Chatgpt to help me understand the reference code.
+     * I sample noise(t + phase) each frame to get a smoothly changing value for natural-looking jitter.
+     * That same noise value drives dynamicR = baseR * (1 + (noiseVal - 0.5) * amplitude), so circles gently pulse in size.
+     * I compute layers = baseLayers + floor((noiseVal - 0.5) * layerRange) to add or remove detail over time.
+     * Color shifts come from (noiseVal - 0.5) * shiftAmount` applied to hue and brightness for subtle, continuous modulation.
+     * Finally, I map noiseVal into strokeWeight, letting outlines ebb and flow in thickness just like in nature.
+     */
 
     function draw() {
-        background('#007B88'); //background color can be adjust!!
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-
+        background('#007B88'); //background color change from black to teal
+        let t = millis()*0.001; //Add Time for noise()
 
         for(let cp of randomCirclePosition){
-            cp.angle += cp.speed * deltaTime;
+            cp.angle += cp.speed * deltaTime; //use spin
 
-            let offsetX = sin(millis() * cp.floatSpeedX + cp.floatPhaseX) * cp.floatAmplitude;
-            let offsetY = cos(millis() * cp.floatSpeedY + cp.floatPhaseY) * cp.floatAmplitude;
+            //Position jitter via noise
+            let offsetX = sin(t + cp.floatPhaseX) * cp.floatAmplitude;
+            let offsetY = cos(t + cp.floatPhaseY) * cp.floatAmplitude;
 
             push();
             //translate(cp.x, cp.y);
@@ -160,211 +139,121 @@ function setup() {
             cp.pg.clear();
             cp.pg.colorMode(HSB, 360, 100, 100);
 
+            let n = noise(t + cp.noisePhase); //Noise-driven value
+                let dynamicR = cp.r * (1 + (n-0.5)*0.4); //Radius variation
+                let layers = 10 + floor((n-0.5)*4); //Layers variation
+
             if(random(1) < 0.2){
-                drawZigzagCircleOn(cp.pg, cp.r, cp.r, 10, cp.r * 0.9);
+                drawZigzagCircleOn(cp.pg, cp.pg.width/2, cp.pg.height/2, layers, dynamicR, n);
             }else{
-             drawHandDrawnCircleOn(cp.pg, cp.r, cp.r, 10, cp.r * 0.9);
+                drawHandDrawnCircleOn(cp.pg, cp.pg.width/2, cp.pg.height/2, layers, dynamicR, n);
             }
         }
-        needRedrawBuffers = false;
+        needRedrawBuffers = false; //Reset flag
         }
     }
-       // rebuildBuffers();
-       // needRedrawBuffers = false;
-    //}
 
-      // for (let r = 0; r < numRows; r++) {
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
+    // PG: drawHandDrawnCircle //added noiseVal
+    function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, noiseVal){
+        let outerMostRadius = maxRadius;
+        for(let i=numLayers;i>0;i--){
+            let radius=(i/numLayers)*maxRadius;
+            // I changed the fill to randomly pick from the palette instead of random RGB
+            let baseCol=color(random(palette));
+            //Hue/Brightness tweak via noise
+            g.fill(hue(baseCol)+(noiseVal-0.5)*80, saturation(baseCol), brightness(baseCol)*(1+(noiseVal-0.5)*0.3),80);
+            g.noStroke();
+            g.ellipse(cx+random(-1,1), cy+random(-1,1), radius*2, radius*2);
+        }
 
-       // for (let c = startCol; c < numCols; c++) {
-            //let cx = c * gridSizeX + gridSizeX/2 + offset;
-            //let cy = r * gridSizeY + gridSizeY/2;
+        let dot=20;
+        let outDotRadius=outerMostRadius+10;
+        for(let i=0;i<dot;i++){
+            let angle=TWO_PI*i/dot;
+            let x=cx+outDotRadius*cos(angle);
+            let y=cy+outDotRadius*sin(angle);
+            // Also updated the dot colors to be picked from the palette
+            let baseDotCol=color(random(palette));
+            //brightness tweak via noise
+            g.fill(hue(baseDotCol)-(noiseVal-0.5)*80, saturation(baseDotCol), brightness(baseDotCol)*(1+(noiseVal-0.5)*0.3),80);
+            g.noStroke();
+            g.ellipse(x,y,5,5);
+        }
+    }
 
-            // update angle
-            //angles[r][c] += speeds[r][c] * deltaTime;
-
-            //push();
-            //translate(cx, cy);
-            //rotate(angles[r][c]);
-            //imageMode(CENTER);
-            //image(buffers[r][c], 0, 0);
-           // pop();
-        //}
-
-// PG: drawHandDrawnCircle
-function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
-    let outerMostRadius = maxRadius;
-    for (let i = numLayers; i > 0; i--) {
-        let radius = (i / numLayers) * maxRadius;
-        // I changed the fill to randomly pick from the palette instead of random RGB
-        let baseCol = color(random(palette));
-        //let newHue = (hue(baseCol)+hueSlider.value()+360) % 360;
-        //let newBrightness = brightness(baseCol) * (brightnessSlider.value()/100);
-        //g.fill(newHue, saturation(baseCol), newBrightness, 80);
-        g.fill(hue(baseCol), saturation(baseCol), brightness(baseCol), 80);
-        //g.fill(color(random(palette) + 'ee'));
+    /**
+     * The following function was adapted from the original `drawZigzagPattern()`
+     * in the reference code by Jera0420 (2024). 
+     * Source: https://github.com/jera0420/jera0420_MajorProject
+     * This function uses trigonometric functions and vertex-based shape creation
+     * (not covered in basic coding lessons). It creates a zigzag circle by alternating
+     * between inner and outer radius vertex points in a polar coordinate system.
+     * I adjusted the strokeWeight to random values for more dynamic visuals.
+     * See Zigzagcircle details in sketch4
+     */
+    //PG:drawZigzagCircle //Add noiseVal
+    function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius, noiseVal){ 
+        // Used palette color with some transparency
+        let baseFillCol = color(random(palette));
+        //Hue tweak via noise
+        g.fill(hue(baseFillCol)+(noiseVal-0.5)*80, saturation(baseFillCol), brightness(baseFillCol)*(1+(noiseVal-0.5)*0.3),80);
         g.noStroke();
-        g.ellipse(cx + random(-1, 1), cy + random(-1, 1), radius * 2, radius * 2);
+        g.circle(cx, cy, maxRadius * 2);
+        let outerRadius = maxRadius * 0.9;
+        let innerRadius = outerRadius * (2 / 3);
+        // Also switched stroke color to use palette
+         let baseStrokeCol = color(random(palette));
+        g.stroke(hue(baseStrokeCol)-(noiseVal-0.5)*80, saturation(baseStrokeCol), brightness(baseStrokeCol)*(1+(noiseVal-0.5)*0.3),80);
+        g.strokeWeight(map(noiseVal,0,1,2,6)); //Stroke weight via noise
+
+        g.beginShape();
+        let ang = 0, step = TWO_PI / 60;
+        for (let i = 0; i < 60; i++) {
+            g.vertex(cx + innerRadius * cos(ang), cy + innerRadius * sin(ang));
+            ang += step;
+            g.vertex(cx + outerRadius * cos(ang), cy + outerRadius * sin(ang));
+            ang += step;
+        }
+        g.endShape(CLOSE);
+        drawHandDrawnCircleOn(g, cx, cy, numLayers, outerRadius * 0.6,noiseVal); //Add noiseVal
+    }  
+
+    //Responsive design
+    function windowResized() {
+        resizeCanvas(windowWidth, windowHeight); 
+        // Regenerate the circular array to adapt to the new window
+        randomCirclePosition = [];
+        let circleNumber = 100;
+        let tries = 0;
+
+        while (randomCirclePosition.length < circleNumber && tries < 10000) {
+            let r = random(30, 80); // random radius
+            let x = random(r, width - r);
+            let y = random(r, height - r);
+
+            let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < cp.r + r + 2);
+            
+            if (!overlap) {
+              // use expanded buffer size
+              let padding = 20;
+              let pg = createGraphics((r+padding)*2, (r+padding)*2);
+              pg.colorMode(HSB, 360, 100, 100);
+              pg.clear();
+
+              randomCirclePosition.push({
+                x, y, r, pg,
+                angle: random(TWO_PI),
+                speed: random([-1, 1]) * random(PI / 6000, PI / 3000),
+                floatPhaseX: random(TWO_PI),
+                floatPhaseY: random(TWO_PI),
+                floatSpeedX: random(0.001, 0.005),
+                floatSpeedY: random(0.001, 0.005),
+                floatAmplitude: random(5, 20),
+                noisePhase: random(1000),
+              });
+            }
+            tries++;
+        }
+
+        needRedrawBuffers = true; //rubuilt buffer
     }
-    let dot = 20;
-    let outDotRadius = outerMostRadius + 10;
-    for (let i = 0; i < dot; i++){
-        let angle = TWO_PI * i / dot;
-        let x = cx + outDotRadius * cos(angle);
-        let y = cy + outDotRadius * sin(angle);
-        // Also updated the dot colors to be picked from the palette
-        //g.fill(color(random(palette)));
-        let baseDotCol = (random(palette));
-        //let newHue = (hue(baseDotCol)+hueSlider.value()+360) % 360;
-        //let newBrightness = brightness(baseDotCol) * (brightnessSlider.value()/100);
-        //g.fill(newHue, saturation(baseDotCol), newBrightness, 80);
-        g.fill(hue(baseDotCol), saturation(baseDotCol), brightness(baseDotCol), 80);
-        g.noStroke();
-        g.ellipse(x, y, 5, 5);
-    }
-}
-
-/**
- * The following function was adapted from the original `drawZigzagPattern()`
- * in the reference code by Jera0420 (2024). 
- * Source: https://github.com/jera0420/jera0420_MajorProject
- * This function uses trigonometric functions and vertex-based shape creation
- * (not covered in basic coding lessons). It creates a zigzag circle by alternating
- * between inner and outer radius vertex points in a polar coordinate system.
- * I adjusted the strokeWeight to random values for more dynamic visuals.
- * See Zigzagcircle details in sketch4
- */
-//PG:drawZigzagCircle
-function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
-    // Used palette color with some transparency
-    let baseFillCol = color(random(palette));
-    //let newHue = (hue(baseFillCol)+hueSlider.value()+360) % 360;
-    //let newBrightness = brightness(baseFillCol) * (brightnessSlider.value()/100);
-        //g.fill(newHue, saturation(baseFillCol), newBrightness, 80);
-    g.fill(hue(baseFillCol), saturation(baseFillCol), brightness(baseFillCol), 80);
-    //g.fill(color(random(palette) + 'e0'));
-    g.noStroke();
-    g.circle(cx, cy, maxRadius * 2);
-
-    let outerRadius = maxRadius * 0.9;
-    let innerRadius = outerRadius * (2 / 3);
-    // Also switched stroke color to use palette
-     let baseStrokeCol = color(random(palette));
-    //let newHue1 = (hue(baseStrokeCol)+hueSlider.value()+360) % 360;
-    //let newBrightness1 = brightness(baseStrokeCol) * (brightnessSlider.value()/100);
-        //g.stroke(newHue1, saturation(baseStrokeCol), newBrightness1, 80);
-    g.stroke(hue(baseStrokeCol), saturation(baseStrokeCol), brightness(baseStrokeCol), 80);
-    //g.stroke(color(random(palette) + 'cc'));
-    g.strokeWeight(random(3, 6));
-
-    g.beginShape();
-    let ang = 0, step = TWO_PI / 60;
-    for (let i = 0; i < 60; i++) {
-        g.vertex(cx + innerRadius * cos(ang), cy + innerRadius * sin(ang));
-        ang += step;
-        g.vertex(cx + outerRadius * cos(ang), cy + outerRadius * sin(ang));
-        ang += step;
-    }
-    g.endShape(CLOSE);
-
-    drawHandDrawnCircleOn(g, cx, cy, numLayers, outerRadius * 0.6);
-
-    let dots = 20;
-    let outR = outerRadius + 10;
-    for (let i = 0; i < dots; i++){
-        let a2 = TWO_PI * i / dots;
-        let x2 = cx + outR * cos(a2);
-        let y2 = cy + outR * sin(a2);
-        // Dot color also from the palette now
-        let baseDotCol = (random(palette));
-        //let newHue = (hue(baseDotCol)+hueSlider.value()+360) % 360;
-        //let newBrightness = brightness(baseDotCol) * (brightnessSlider.value()/100);
-        //g.fill(newHue, saturation(baseDotCol), newBrightness, 80);
-        //g.fill(color(random(palette)));
-        g.fill(hue(baseDotCol), saturation(baseDotCol), brightness(baseDotCol), 80);
-        g.noStroke();
-        g.ellipse(x2, y2, 5, 5);
-    }
-}
-
-//function rebuildBuffers() {
-    //let gridSizeX = width / numCols;
-    //let gridSizeY = height / numRows;
-    
-    //let layers = 12;
-    //let maxRadius = min(gridSizeX, gridSizeY) * 0.5;
-
-   // for (let r = 0; r < numRows; r++) {
-        //buffers[r] = [];
-        //let offset = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            //let pg = createGraphics(gridSizeX, gridSizeY);
-            //pg.colorMode(HSB, 360, 100, 100);
-            //pg.clear();
-            //pg.noStroke();
-            //let cx = gridSizeX / 2;
-            //let cy = gridSizeY / 2;
-
-            //if (random(1) < 0.2) {
-                //drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            //} else {
-                //drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            //}
-            //buffers[r][c] = pg;
-        //}
-    //}
-//}
-
-// //buffers can be rebuilt if necessary
-function windowResized() {
-    resizeCanvas(windowWidth, windowHeight); 
-//     //redraw();
-//     needRedrawBuffers = true;
-
-    randomCirclePosition = [];
-    let count = 50;
-    let attempts = 0;
-    let margin = 0.5; // expand buffer by 30% to avoid cutoff
-
-  while (randomCirclePosition.length < count && attempts < 10000) {
-    let r = random(30, 80); // random radius
-    let x = random(r, width - r);
-    let y = random(r, height - r);
-
-    let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < cp.r + r + 2);
-    if (!overlap) {
-      // use expanded buffer size
-      let bufferSize = r * 2 * (1 + margin);
-      let pg = createGraphics(bufferSize, bufferSize);
-      pg.colorMode(HSB, 360, 100, 100);
-      pg.clear();
-
-      // draw at center of expanded buffer
-      let cx = pg.width / 2;
-      let cy = pg.height / 2;
-
-      if (random(1) < 0.2) {
-        drawZigzagCircleOn(pg, cx, cy, 10, r * 0.9);
-      } else {
-        drawHandDrawnCircleOn(pg, cx, cy, 10, r * 0.9);
-      }
-
-      randomCirclePosition.push({
-        x, y, r, pg,
-        angle: random(TWO_PI),
-        speed: random([-1, 1]) * random(PI / 6000, PI / 3000),
-        floatPhaseX: random(TWO_PI),
-        floatPhaseY: random(TWO_PI),
-        floatSpeedX: random(0.001, 0.005),
-        floatSpeedY: random(0.001, 0.005),
-        floatAmplitude: random(1, 8)
-      });
-    }
-    attempts++;
-  }
-
-  needRedrawBuffers = false;
-}

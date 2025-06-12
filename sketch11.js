@@ -2,6 +2,8 @@
 let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 // I added a slider to adjust the hue and brightness of the image
 let hueSlider, brightnessSlider;
+
+
 /**
  * I use the needRedrawBuffers flag and buffers to avoid redrawing everything on every frame, rebuilding caches only when necessary.
  * Reference: https://p5js.org/reference/p5/redraw/
@@ -9,12 +11,6 @@ let hueSlider, brightnessSlider;
 let needRedrawBuffers = true;
 let randomCirclePosition = [];//replace grid array
 
-//I add the buffer for spin
-//const numCols = 8;
-//const numRows = 5;
-//let angles = [];   //store the current angle of each circle
-//let speeds = [];   //store the current spin speed of each circle
-//let buffers = [];  // add off-screen layer caching
 
 /**
  * The following lines were taken from ChatGPT and examples like
@@ -90,42 +86,7 @@ function setup() {
         tries++;
       }
     }
-    //let gridSizeX = width / numCols; 
-    //let gridSizeY = height / numRows;
-    // let numCols = 8;
-    // let numRows = 5; //I change the line to make symmetry
-    // let layers = 12; //I adjust a liitle bit to make it more colorful
-    // let maxRadius = min(gridSizeX, gridSizeY) * 0.5; //I adjust a liitle bit
-
-    // Initialize angles, speeds, and offscreen buffers
-    //for (let r = 0; r < numRows; r++) {
-      //  angles[r]  = [];
-       //speeds[r]  = [];
-       // buffers[r] = [];
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            // angle and speed
-            //angles[r][c] = random(TWO_PI);
-            //let arcPerSec = random(TWO_PI/90, TWO_PI/45);  // speed can be adjusted  
-            //speeds[r][c] = arcPerSec / 1000 * (random() < 0.5 ? 1 : -1);
-
-            // Offscreen layer caching: draw each static circle once onto a p5.Graphics (PG)
-            // Offscreen layer strategy (osteele, 2022), see appendix.
-            // let pg = createGraphics(gridSizeX, gridSizeY);
-            // pg.clear();
-            // pg.noStroke();
-            // let cx = gridSizeX/2, cy = gridSizeY/2;
-            // if (random(1) < 0.2) {
-            //     drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            // } else {
-            //     drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            // buffers[r][c] = pg; // store PG for this cell
-        //}
-    //}
-     //rebuildBuffers();
-//}
+   
 
     function draw() {
         background('#000000'); //background color can be adjust!!
@@ -163,28 +124,7 @@ function setup() {
         needRedrawBuffers = false;
         }
     }
-       // rebuildBuffers();
-       // needRedrawBuffers = false;
-    //}
-
-      // for (let r = 0; r < numRows; r++) {
-        //let offset   = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-       // for (let c = startCol; c < numCols; c++) {
-            //let cx = c * gridSizeX + gridSizeX/2 + offset;
-            //let cy = r * gridSizeY + gridSizeY/2;
-
-            // update angle
-            //angles[r][c] += speeds[r][c] * deltaTime;
-
-            //push();
-            //translate(cx, cy);
-            //rotate(angles[r][c]);
-            //imageMode(CENTER);
-            //image(buffers[r][c], 0, 0);
-           // pop();
-        //}
+     
 
 // PG: drawHandDrawnCircle
 function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius){
@@ -277,61 +217,39 @@ function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius) {
     }
 }
 
-//function rebuildBuffers() {
-    //let gridSizeX = width / numCols;
-    //let gridSizeY = height / numRows;
-    
-    //let layers = 12;
-    //let maxRadius = min(gridSizeX, gridSizeY) * 0.5;
-
-   // for (let r = 0; r < numRows; r++) {
-        //buffers[r] = [];
-        //let offset = (r % 2 === 0) ? gridSizeX / 2 : 0;
-        //let startCol = (r % 2 === 0) ? -1 : 0;
-
-        //for (let c = startCol; c < numCols; c++) {
-            //let pg = createGraphics(gridSizeX, gridSizeY);
-            //pg.colorMode(HSB, 360, 100, 100);
-            //pg.clear();
-            //pg.noStroke();
-            //let cx = gridSizeX / 2;
-            //let cy = gridSizeY / 2;
-
-            //if (random(1) < 0.2) {
-                //drawZigzagCircleOn(pg, cx, cy, layers, maxRadius);
-            //} else {
-                //drawHandDrawnCircleOn(pg, cx, cy, layers, maxRadius);
-            //}
-            //buffers[r][c] = pg;
-        //}
-    //}
-//}
-
-// //buffers can be rebuilt if necessary
+// Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
+// https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
+// This version retains the original logic of avoiding overlap,
+// but integrates our own buffer drawing and animation properties.
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight); 
-//     //redraw();
-//     needRedrawBuffers = true;
+  resizeCanvas(windowWidth, windowHeight);
 
-    randomCirclePosition = [];
-    let count = 50;
-    let attempts = 0;
-    let margin = 0.5; // expand buffer by 30% to avoid cutoff
+  randomCirclePosition = [];
+  let protection = 0;
+  let targetCount = 50;
+  let margin = 0.5; // Expand buffer by 50% to avoid cutoff
 
-  while (randomCirclePosition.length < count && attempts < 10000) {
-    let r = random(30, 80); // random radius
+  while (randomCirclePosition.length < targetCount) {
+    let r = random(30, 80);
     let x = random(r, width - r);
     let y = random(r, height - r);
 
-    let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < cp.r + r + 2);
-    if (!overlap) {
-      // use expanded buffer size
+    let overlapping = false;
+    for (let i = 0; i < randomCirclePosition.length; i++) {
+      let other = randomCirclePosition[i];
+      let d = dist(x, y, other.x, other.y);
+      if (d < r + other.r + 2) {
+        overlapping = true;
+        break;
+      }
+    }
+
+    if (!overlapping) {
       let bufferSize = r * 2 * (1 + margin);
       let pg = createGraphics(bufferSize, bufferSize);
       pg.colorMode(HSB, 360, 100, 100);
       pg.clear();
 
-      // draw at center of expanded buffer
       let cx = pg.width / 2;
       let cy = pg.height / 2;
 
@@ -352,7 +270,11 @@ function windowResized() {
         floatAmplitude: random(1, 8)
       });
     }
-    attempts++;
+
+    protection++;
+    if (protection > 10000) {
+      break; // avoid infinite loop
+    }
   }
 
   needRedrawBuffers = false;

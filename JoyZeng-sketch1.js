@@ -1,18 +1,21 @@
-// I added a color palette extracted from the painting ‘Wheel of Fortune’ instead of random RGB 
+/** 
+ * Color palette extracted from the painting 'Wheel of Fortune',
+ *  used to replace random RGB color generation for visual consistency.
+ */
 let palette = [
     "#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", 
     "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
-// I added a slider to adjust the hue and brightness of the image
 
-//Remove Hue and Brightness Sliders and Revert to Static HSB Color Rendering
-//delete: let hueSlider, brightnessSlider; 
+// Hue and brightness sliders implemented for interactive color adjustment
+// Remove Hue and Brightness Sliders and Revert to Static HSB Color Rendering
+// delete: let hueSlider, brightnessSlider; 
 
 /**
  * I use the needRedrawBuffers flag and buffers to avoid redrawing everything on every frame, rebuilding caches only when necessary.
  * Reference: https://p5js.org/reference/p5/redraw/
  */
 let needRedrawBuffers = true; //Added flag for noise-driven redraw
-let randomCirclePosition = [];//replace grid array
+let randomCirclePosition = []; //replace grid array
 
 /**
  * The following lines were taken from ChatGPT and examples like
@@ -33,7 +36,7 @@ let randomCirclePosition = [];//replace grid array
  *    https://openprocessing.org/sketch/2189726
  * 2. “Blobby!” tutorial video by The Coding Train:
  *    https://www.youtube.com/watch?v=rX5p-QRP6R4
- * 3. “Blobby Wave” by takawo on OpenProcessing (sketch '857874')
+ * 3. “200520” by takawo on OpenProcessing (sketch '857874')
  *    https://openprocessing.org/sketch/857874
  * 4. “Storybook Waves” by VKS on OpenProcessing (sketch '2383330'), credit due to openprocessing user VKS
  *    https://openprocessing.org/sketch/2383330
@@ -75,11 +78,12 @@ function setup() {
         *  https://p5js.org/reference/p5/brightness/
         *  https://p5js.org/reference/p5/lightness/
     */
+
     //Delete slider for focusing on my individuel part. Perlin noise and randomness
     //I want to use noise() drives the fine-tuning of radius, the number of layers, position jitter, and hue/brightness
 
     //Randomly place non-overlapping circles on the canvas and cache in offscreen buffers
-    let circleNumber = 100; //circle number //changed from 50 to 100
+    let circleNumber = 80; //circle number //changed from 50 to 100
     let tries = 0;
 
     while(randomCirclePosition.length < circleNumber && tries < 10000){//non-overlapping circles with random radius
@@ -91,7 +95,7 @@ function setup() {
         let overlapping = false;
         for(let cp of randomCirclePosition){
             let d = dist(x, y, cp.x, cp.y);
-            if(d < r +cp.r +2){//confirm the circles distance
+            if(d < r +cp.r +2){ //confirm the circles distance
                 overlapping = true;
                 break;
             }
@@ -128,6 +132,12 @@ function setup() {
       }
     }
 
+    /** 
+ *  Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
+ * References:https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
+ * This version retains the original logic of avoiding overlap,
+ * but integrates our own buffer drawing and animation properties.
+ */
     // When the window size changes, adjust the canvas and reset the wave gradient and ring array
     function windowResized() {
         resizeCanvas(windowWidth, windowHeight);
@@ -142,7 +152,7 @@ function setup() {
     
     // Clear the old color circle data and regenerate it
     randomCirclePosition = [];
-    let circleNumber = 100, tries = 0;
+    let circleNumber = 80, tries = 0;
     while (randomCirclePosition.length < circleNumber && tries < 10000) {
     let r = random(30, 80);
     let x = random(r, width - r);
@@ -285,20 +295,6 @@ function setup() {
             }
         }
 
-        //let dot=20;
-        //let outDotRadius=outerMostRadius+10;
-        //for(let i=0;i<dot;i++){
-            //let angle=TWO_PI*i/dot;
-            //let x=cx+outDotRadius*cos(angle);
-            //let y=cy+outDotRadius*sin(angle);
-            // Also updated the dot colors to be picked from the palette
-            //let baseDotCol=color(random(palette));
-            //brightness tweak via noise
-            //g.fill(hue(baseDotCol)-(noiseVal-0.5)*80, saturation(baseDotCol), brightness(baseDotCol)*(1+(noiseVal-0.5)*0.3),80);
-            //g.noStroke();
-            //g.ellipse(x,y,5,5);
-        //}
-
     /**
      * The following function was adapted from the original `drawZigzagPattern()`
      * in the reference code by Jera0420 (2024). 
@@ -343,43 +339,3 @@ function setup() {
         g.endShape(CLOSE);
         drawHandDrawnCircleOn(g, cx, cy, numLayers, outerRadius * 0.6,noiseVal); //Add noiseVal
     }  
-
-    //Responsive design
-    //function windowResized() {
-        //resizeCanvas(windowWidth, windowHeight); 
-        // Regenerate the circular array to adapt to the new window
-        //randomCirclePosition = [];
-        //let circleNumber = 100;
-        //let tries = 0;
-
-        //while (randomCirclePosition.length < circleNumber && tries < 10000) {
-            //let r = random(30, 80); // random radius
-            //let x = random(r, width - r);
-            //let y = random(r, height - r);
-
-            //let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < cp.r + r + 2);
-            
-            //if (!overlap) {
-              // use expanded buffer size
-              //let padding = 20;
-              //let pg = createGraphics((r+padding)*2, (r+padding)*2);
-              //pg.colorMode(HSB, 360, 100, 100);
-              //pg.clear();
-
-              //randomCirclePosition.push({
-                //x, y, r, pg,
-                //angle: random(TWO_PI),
-                //speed: random([-1, 1]) * random(PI / 6000, PI / 3000),
-                //floatPhaseX: random(TWO_PI),
-                //floatPhaseY: random(TWO_PI),
-                //floatSpeedX: random(0.001, 0.005),
-                //floatSpeedY: random(0.001, 0.005),
-                //floatAmplitude: random(5, 20),
-                //noisePhase: random(1000),
-              //});
-            //}
-            //tries++;
-        //}
-
-        //needRedrawBuffers = true; //rubuilt buffer
-    //}

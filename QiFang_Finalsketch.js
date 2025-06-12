@@ -96,8 +96,12 @@ function draw() {
     let birdOffsetX = 180;
     let birdOffsetY = -180;
     let scaleRatio = 0.15;
-    let birdX = constrain(mouseX + birdOffsetX, 0, width);
-    let birdY = constrain(mouseY + birdOffsetY, 0, height);
+
+    let birdW = birdImage.width * scaleRatio;
+    let birdH = birdImage.height * scaleRatio;
+
+    let birdX = constrain(mouseX + birdOffsetX, birdW / 2, width - birdW/2);
+    let birdY = constrain(mouseY + birdOffsetY, birdH / 2, height - birdH/2);
 
         for(let cp of randomCirclePosition){
             cp.angle += cp.speed * deltaTime; // according to the speed to upload the angle

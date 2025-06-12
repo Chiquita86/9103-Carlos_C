@@ -59,7 +59,7 @@ Below is an example showing the effect of interaction:
 ![Adjusting sliders to explore color variations](./assets/adjusted_sliders.jpg)
 
 1.Choose Music
-(./assets/chose.png)
+![chose music](./assets/chose.png)
 2.The circles change in response to the sound
 (./assets/fft.png)
 3.Stereo panning changes

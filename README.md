@@ -47,7 +47,7 @@ Building on the group's static sketch (Sketch9), I created this time-based and i
 ## File Structure
 
 - `index.html` – HTML entry point
-- `time.js` – Main p5.js sketch and ripple logic
+- `[Individual Project]_Time-base.js` – Main p5.js sketch and ripple logic
 - `assets/ripples.png` – Animation screenshot
 - `README.md` – This documentation file
 

@@ -133,9 +133,9 @@ function setup() {
  * This version retains the original logic of avoiding overlap,
  * but integrates our own buffer drawing and animation properties.
  */
-    // When the window size changes, adjust the canvas and reset the wave gradient and ring array
-    function windowResized() {
-        resizeCanvas(windowWidth, windowHeight);
+// When the window size changes, adjust the canvas and reset the wave gradient and ring array
+  function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
 
     // Rebuilt the gradient to fit the new width
      midStop = random(0.3, 0.7);
@@ -155,7 +155,7 @@ function setup() {
       textParticles = [];
     }
 
-    // Initialize non-overlapping floating circles with offscreen buffers
+// Initialize non-overlapping floating circles with offscreen buffers
 function initCircles() {
     randomCirclePosition = [];
     let circleNumber = 80, tries = 0;
@@ -187,32 +187,32 @@ function initCircles() {
   needRedrawBuffers = true; // mark buffers for redraw
 }
 
-    /**
-     * For my Individual Task: Perlin noise and randomness
-     * I trying to drive multiple parameters—position jitter, radius variation, layer count, hue/brightness shifts, and stroke weight—using Perlin Noise for smooth, natural motion.
+/**
+ * For my Individual Task: Perlin noise and randomness
+ * I trying to drive multiple parameters—position jitter, radius variation, layer count, hue/brightness shifts, and stroke weight—using Perlin Noise for smooth, natural motion.
     
-    * I drew inspiration and references from:
-     * 1. Daniel Shiffman’s “Intro to Perlin Noise,” Part I.2, which shows how p5.js’s noise() can generate continuously varying random values to animate parameters.  
-     * https://thecodingtrain.com/tracks/the-nature-of-code-2/noc/perlin/intro-to-perlin-noise/
-     * 2. “Flow Fields and Noise Algorithms with p5.js” by Tom Holloway , 
-     * demonstrating the use of 3D Perlin Noise to control particle flow fields and color variation—analogous to my multi-layer noise-driven graphics approach.  
-     * Sample noise(x * scale, y * scale, z) to get an angle at each point.
-     * Convert that to a vector (cos(angle), sin(angle)) to drive particle motion.
-     * Use the third dimension z (often means time) to animate over frames.
-     * https://dev.to/nyxtom/flow-fields-and-noise-algorithms-with-p5-js-5g67
-     * 3. The Coding Train’s “Perlin Noise Flow Field” example, which applies noise() to generate smooth directional offsets for position and rotation in a flow field.  
-     * Maintain an array of “particles” each with a position and velocity.
-     * At each update, sample angle = TAU * noise(px * inc, py * inc, t).
-     * vx = cos(angle) * speed; vy = sin(angle) * speed. Using (vx, vy) to particle position for natural, flowing movement.
-     * https://editor.p5js.org/codingtrain/sketches/vDcIAbfg7
+ *I drew inspiration and references from:
+ * 1. Daniel Shiffman’s “Intro to Perlin Noise,” Part I.2, which shows how p5.js’s noise() can generate continuously varying random values to animate parameters.  
+ * https://thecodingtrain.com/tracks/the-nature-of-code-2/noc/perlin/intro-to-perlin-noise/
+ * 2. “Flow Fields and Noise Algorithms with p5.js” by Tom Holloway , 
+ * demonstrating the use of 3D Perlin Noise to control particle flow fields and color variation—analogous to my multi-layer noise-driven graphics approach.  
+ * Sample noise(x * scale, y * scale, z) to get an angle at each point.
+ * Convert that to a vector (cos(angle), sin(angle)) to drive particle motion.
+ * Use the third dimension z (often means time) to animate over frames.
+ * https://dev.to/nyxtom/flow-fields-and-noise-algorithms-with-p5-js-5g67
+ * 3. The Coding Train’s “Perlin Noise Flow Field” example, which applies noise() to generate smooth directional offsets for position and rotation in a flow field.  
+ * Maintain an array of “particles” each with a position and velocity.
+ * At each update, sample angle = TAU * noise(px * inc, py * inc, t).
+ * vx = cos(angle) * speed; vy = sin(angle) * speed. Using (vx, vy) to particle position for natural, flowing movement.
+ * https://editor.p5js.org/codingtrain/sketches/vDcIAbfg7
      
-    * 4. Using Chatgpt to help me understand the reference code.
-     * I sample noise(t + phase) each frame to get a smoothly changing value for natural-looking jitter.
-     * That same noise value drives dynamicR = baseR * (1 + (noiseVal - 0.5) * amplitude), so circles gently pulse in size.
-     * I compute layers = baseLayers + floor((noiseVal - 0.5) * layerRange) to add or remove detail over time.
-     * Color shifts come from (noiseVal - 0.5) * shiftAmount` applied to hue and brightness for subtle, continuous modulation.
-     * Finally, I map noiseVal into strokeWeight, letting outlines ebb and flow in thickness just like in nature.
-     */
+ * 4. Using Chatgpt to help me understand the reference code.
+ * I sample noise(t + phase) each frame to get a smoothly changing value for natural-looking jitter.
+ * That same noise value drives dynamicR = baseR * (1 + (noiseVal - 0.5) * amplitude), so circles gently pulse in size.
+ * I compute layers = baseLayers + floor((noiseVal - 0.5) * layerRange) to add or remove detail over time.
+ * Color shifts come from (noiseVal - 0.5) * shiftAmount` applied to hue and brightness for subtle, continuous modulation.
+ * Finally, I map noiseVal into strokeWeight, letting outlines ebb and flow in thickness just like in nature.
+ */
 
     //Main draw loop
     function draw() {
@@ -359,7 +359,9 @@ function initCircles() {
   image(waveLayer,0,0);
   if (waveGrid.every(c=>c.dead)&&waveParticles.length===0) initWave();
 
-    //Add interactive layer, draw ripples
+  // Draw the interactive layer (make sure it is on top of all layers)
+  drawInteractiveLayer();
+  //Add interactive layer, draw ripples
     for (let i = ripples.length - 1; i >= 0; i--) {
         let ripple = ripples[i];
         ripple.update();
@@ -369,6 +371,7 @@ function initCircles() {
         }
     }
 }
+
 //initialize grid for particle emission
 function initWave() {
   waveGrid=[]; waveParticles=[]; waveFrame=0;
@@ -428,7 +431,7 @@ class LetterParticle {
   }
 }
 
-    // PG: drawHandDrawnCircle //added noiseVal
+// PG: drawHandDrawnCircle //added noiseVal
     function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, noiseVal = 0.5){
         //Draw semi-transparent handdraw circle layer by layer and add dot on the outermost layer
         for(let i=numLayers;i>0;i--){
@@ -455,7 +458,7 @@ class LetterParticle {
                 g.noStroke();
                 g.ellipse(cx + cos(a)*outerR, cy + sin(a)*outerR, 5, 5);
             }
-        }
+      }
 
     /**
      * The following function was adapted from the original `drawZigzagPattern()`
@@ -467,7 +470,7 @@ class LetterParticle {
      * I adjusted the strokeWeight to random values for more dynamic visuals.
      * See Zigzagcircle details in sketch4
      */
-    //PG:drawZigzagCircle //Add noiseVal
+  //PG:drawZigzagCircle //Add noiseVal
     function drawZigzagCircleOn(g, cx, cy, numLayers, maxRadius, noiseVal = 0.5){ 
         // Used palette color with some transparency
         let baseFillCol = color(random(palette));
@@ -516,6 +519,7 @@ class Ripple {
         this.radius = 0;
         this.alpha = 255;
         this.speed = 3;
+        this.noiseSeed = random(1000); //Each ripple with independent noise seed
     }
 
     update() {
@@ -527,7 +531,19 @@ class Ripple {
         stroke(0, 0, 100, this.alpha);
         strokeWeight(2);
         noFill();
-        ellipse(this.x, this.y, this.radius * 2);
+
+        // Generate fluctuation edges using Perlin noise
+        beginShape();
+        let detail = 60; // edge detail
+        for (let i = 0; i < detail; i++) {
+            let angle = TWO_PI * i / detail;
+            // Noise affects radius offset and generates natural fluctuations
+            let noiseOffset = map(noise(angle * 5 + this.noiseSeed, frameCount * 0.02), 0, 1, -10, 10);
+            let xPos = this.x + (this.radius + noiseOffset) * cos(angle);
+            let yPos = this.y + (this.radius + noiseOffset) * sin(angle);
+            vertex(xPos, yPos);
+        }
+        endShape(CLOSE);
     }
 
     isDead() {
@@ -537,7 +553,8 @@ class Ripple {
 function drawInteractiveLayer() {
     // Clear the interaction layer (keep the transparency)
     interactiveLayer.drawingContext.globalCompositeOperation = 'destination-out';
-    interactiveLayer.fill(0, 0, 0, 5);
+    //Change high transparency to accelerate the clearance speed
+    interactiveLayer.fill(0, 0, 0, 15);
     interactiveLayer.rect(0, 0, width, height);
     interactiveLayer.drawingContext.globalCompositeOperation = 'source-over';
     
@@ -638,47 +655,5 @@ class PerlinBubble {
     
     isDead() {
         return this.alpha <= 0;
-    }
-}
-
-// TextPaticle
-class TextParticle {
-    constructor(x, y, char) {
-        this.pos = createVector(x, y);
-        this.char = char;
-        this.life = 255;
-        this.size = random(12, 24);
-        this.speed = random(2, 5);
-        this.angle = random(TWO_PI);
-        this.noiseAmp = random(10, 20);
-        this.dead = false;
-    }
-    
-    update() {
-        // Generate natural motion trajectories using Perlin noise
-        let noiseX = noise(this.pos.x * 0.01, this.pos.y * 0.01, frameCount * 0.02) * 2 - 1;
-        let noiseY = noise(this.pos.x * 0.01 + 100, this.pos.y * 0.01 + 100, frameCount * 0.02) * 2 - 1;
-        
-        this.pos.x += cos(this.angle) * this.speed + noiseX * 3;
-        this.pos.y += sin(this.angle) * this.speed + noiseY * 3;
-        
-        this.life -= 2;
-        this.size *= 0.98;
-        if (this.life <= 0 || this.size < 4) {
-            this.dead = true;
-        }
-    }
-    
-    show(pg) {
-        pg.push();
-        pg.translate(this.pos.x, this.pos.y);
-        pg.rotate(noise(this.pos.x * 0.01, this.pos.y * 0.01) * 0.6 - 0.3);
-        
-        pg.noStroke();
-        pg.fill(50, 150, 255, this.life);
-        pg.textSize(this.size);
-        pg.text(this.char, 0, 0);
-        
-        pg.pop();
     }
 }

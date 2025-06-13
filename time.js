@@ -17,12 +17,6 @@
 // // Color palette extracted from 'Wheel of Fortune'
 let palette = ["#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 
-// Global redraw control flag
-let needRedrawBuffers = true;
-
-// Array to store non-overlapping circle data
-let randomCirclePosition = [];
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
@@ -99,23 +93,28 @@ class Ripple {
     this.angle = random(TWO_PI);
     this.layerStart = [];
     this.layerHue = [];
-    this.maxLayers = 9;
     this.layerInterval = 1000; // ms between ripples
     this.expandDuration = 8000; // ms for a full expansion
     this.birth = millis();
-    for (let i = 0; i < this.maxLayers; i++) {
-      this.layerStart[i] = this.birth + i * this.layerInterval;
-      this.layerHue[i] = color(random(palette));
-    }
+  
   }
 
   update() {
     let now = millis();
-    for (let i = 0; i < this.maxLayers; i++) {
-      if (now - this.layerStart[i] > this.expandDuration) {
-        this.layerStart[i] = now;
-        this.layerHue[i] = color(random(palette));
-      }
+    
+    // Add new ripple layer when the previous one has passed interval
+    if (
+      this.layerStart.length === 0 ||
+      now - this.layerStart[this.layerStart.length - 1] > this.layerInterval
+    ) {
+      this.layerStart.push(now);
+      this.layerHue.push(color(random(palette)));
+    }
+
+    // Remove layers that have finished expanding
+    while (this.layerStart.length > 0 && now - this.layerStart[0] > this.expandDuration) {
+      this.layerStart.shift();
+      this.layerHue.shift();
     }
   }
 
@@ -126,7 +125,7 @@ class Ripple {
     let pg = createGraphics(this.r * 2, this.r * 2);
     pg.colorMode(HSB, 360, 100, 100);
     pg.clear();
-    for (let i = 0; i < this.maxLayers; i++) {
+    for (let i = 0; i < this.layerStart.length; i++) {
       let now = millis();
       let elapsed = now - this.layerStart[i];
       if (elapsed >= 0 && elapsed <= this.expandDuration) {
@@ -137,5 +136,24 @@ class Ripple {
     imageMode(CENTER);
     image(pg, 0, 0);
     pop();
+  }
+
+  skipToNextLayer() {
+    let now = millis();
+    // Advance the first inactive ripple or immediately add a new one
+    for (let i = 0; i < this.layerStart.length; i++) {
+      if (now < this.layerStart[i]) {
+        this.layerStart[i] = now;
+        return;
+      }
+    }
+    this.layerStart.push(now);
+    this.layerHue.push(color(random(palette)));
+  }
+}  
+
+function mousePressed() {
+  for (let rp of ripples) {
+    rp.skipToNextLayer(); // custom method to trigger next ripple early
   }
 }

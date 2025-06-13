@@ -84,7 +84,9 @@ function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, progress = 1, ba
 }
 
 
-// Class-based ripple animation for each circle
+// Ripple class inspired by "Rainbow Ripples" by Richard Bourne
+// https://openprocessing.org/sketch/1986824
+// Adapted to use millis()-based timing and continuous ripple generation
 class Ripple {
   constructor(x, y, r) {
     this.x = x;
@@ -152,6 +154,9 @@ class Ripple {
   }
 }  
 
+
+// Mouse interaction adapted from the concept in "Rainbow Ripples"
+// Instead of adding new ripple objects, here we accelerate the next ripple layer
 function mousePressed() {
   for (let rp of ripples) {
     rp.skipToNextLayer(); // custom method to trigger next ripple early

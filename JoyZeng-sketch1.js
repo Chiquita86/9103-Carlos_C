@@ -6,9 +6,8 @@ let palette = [
     "#b4518c", "#beadcc", "#53569d", "#dc8a4d", "#444a1f", "#d8c16f", 
     "#db4c5b", "#52b266", "#537bba", "#8e342d", "#6a81ca", "#cbb6b7"];
 
-// Hue and brightness sliders implemented for interactive color adjustment
-// Remove Hue and Brightness Sliders and Revert to Static HSB Color Rendering
-// delete: let hueSlider, brightnessSlider; 
+// Hue/Brightness sliders were used in early prototypes but are now removed
+// Perlin noise is now used to drive all color variations
 
 /**
  * I use the needRedrawBuffers flag and buffers to avoid redrawing everything on every frame, rebuilding caches only when necessary.
@@ -51,6 +50,8 @@ let yoff = 0; //Perlin noise offset used to drive waves
 
 //Added Particle Trails
 //Particle text-trail variables: char array, spawn index, offscreen layer, grid & particles
+// Use RGB color mode for dot/letter particles to match [R,G,B] values
+// (If using HSB, ensure colorMode is correctly set to HSB)
 let chars, spawnIdx = 0;
 let waveLayer;
 let waveGrid = [], waveParticles = [];
@@ -61,9 +62,9 @@ let waveFrame = 0; //current frame count
 let waveMaxR; // max radius
 const fadeAlpha = 10; //fade alpha for trails
 
-// Global gradient buffer updated on resize// Changed the local gradient variable to a global waveGradient to allow direct use in draw.
-//let waveGradient;
-//let midStop; // gradient midpoint stop value
+//Global gradient buffer updated on resize//Changed the local gradient variable to a global waveGradient to allow direct use in draw.
+let waveGradient;
+let midStop; // gradient midpoint stop value
 
 // Dynamic gradient parameters
 let gradPhase; // holds noise phase for gradient
@@ -91,7 +92,8 @@ function setup() {
     textAlign(CENTER, CENTER); //center text alignment
 
     //Build gradients
-    // Changed to the dynamic gradient build
+    // midStop: initial gradient midpoint, used at setup and resize
+    // currentMid: animated midpoint value, changes over time via noise
     midStop = random(0.3, 0.7);
     waveGradient = drawingContext.createLinearGradient(0, 0, width, 0);
     waveGradient.addColorStop(0, '#87dfd6');
@@ -128,12 +130,13 @@ function setup() {
     //I want to use noise() drives the fine-tuning of radius, the number of layers, position jitter, and hue/brightness
 
 /** 
- *  Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
+ * Code adapted and refactored from Daniel Shiffman's "Random Circles with No Overlap"
  * References:https://github.com/CodingTrain/website-archive/tree/main/Tutorials/P5JS/p5.js/09/9.08_p5.js_Random_Circles_with_No_Overlap
  * This version retains the original logic of avoiding overlap,
  * but integrates our own buffer drawing and animation properties.
  */
-// When the window size changes, adjust the canvas and reset the wave gradient and ring array
+// Handle window resizing: reset gradient, buffers, and circle positions
+// (Move this function to below draw() to improve readability)
   function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 
@@ -239,7 +242,7 @@ if (!isOverlap(x, y, r)) {
         background('#87dfd6'); //background color change
 
         //Bottom layer: Blobby Wave
-        //Blobby Wave: Multiple wave shapes are generated using noise(), and the frequency of each wave increases
+        //Blobby Wave: Multiple wave shapes generated using Perlin noise, with increasing vertical spacing and dynamic amplitude
         noStroke();
         drawingContext.shadowOffsetX = 5;
         drawingContext.shadowOffsetY = 10;
@@ -288,7 +291,7 @@ if (!isOverlap(x, y, r)) {
         drawingContext.restore();
     
     //Redraw buffers only if necessary
-    // Update the colorcircle details in offscreen buffers based on noise
+    //Update the colorcircle details in offscreen buffers based on noise
     if(needRedrawBuffers){
         for(let cp of randomCirclePosition){
             cp.pg.clear();
@@ -513,10 +516,27 @@ class LetterParticle {
     }  
 
 
-//Add mouse click function
-function mouseClicked() {
-    ripples.push(new Ripple(mouseX, mouseY));
-}
+/**
+ * This interactive layer was inspired by the following projects:
+ * 1. Inspired by the "When the rainy day came" by Sihua post on xiaohongshu and yokoego's photographic works
+ *    https://www.xiaohongshu.com/explore/67f88d7c000000001d000250?xsec_token=AB2DwK41iQ8UYLbduODAfTuf3TRNpyZQYICbunKYPiy6U=&xsec_source=
+ *    https://www.instagram.com/yokoego/p/C0WLaX5LgCJ/
+ * 2. "FlowFields" by Aditys018 on Github
+ *     https://github.com/Aditys018/FlowFields
+ *    Demonstrates how to use Perlin noise to drive particle movement across a canvas, creating organic, flowing trails with a fading background.
+ * 2. "Perlin Noise Flow Field" by Abar23 on Github
+ *    https://github.com/Abar23/Perlin-Noise-Flow-Field
+ *    Implements a vector field generated from Perlin noise where each particle follows a flow direction based on noise-influenced angles.
+ * 3. "Perlin Noise Demonstration" by Tim Murray-Browne on openprocessing (sketch 103588)
+ *    https://openprocessing.org/sketch/103588
+ *    Visualizes how small input changes to noise() can generate smooth shape deformations.
+ *
+ * My implementation builds upon these concepts by combining:
+ * Offscreen graphics layers for isolated rendering
+ * Perlin-driven shape deformation for bubble, simulate trail persistence
+ * Interaction mapping via mouse press
+ * Use Chatgpt to help me understand and test all thses ideas.
+ */
 
 //Add ripple class
 class Ripple {
@@ -558,7 +578,7 @@ class Ripple {
     }
 }
 function drawInteractiveLayer() {
-    // Clear the interaction layer (keep the transparency)
+    //Clear the interaction layer (keep the transparency)
     interactiveLayer.drawingContext.globalCompositeOperation = 'destination-out';
     //Change high transparency to accelerate the clearance speed
     interactiveLayer.fill(0, 0, 0, 15);
@@ -587,9 +607,8 @@ function drawInteractiveLayer() {
     image(interactiveLayer, 0, 0);
 }
 
-// Add Mouse click event (generating Perlin bubbles or text particles)
+// Add mouse click: short press generates ripple + Perlin bubble
 function mouseClicked() {
-    // Short press generates bubbles, long press generates text particles
     if (millis() - lastPressTime < PRESS_DURATION) {
         isLongPress = true;
         lastPressTime = millis();

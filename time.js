@@ -18,10 +18,17 @@ function setup() {
 function draw() {
   background(0);
   for (let cp of randomCirclePosition) {
+    cp.timer += 0.01; 
+    let progress = (sin(cp.timer) + 1) / 2; 
     push();
     translate(cp.x, cp.y);
     rotate(cp.angle);
     imageMode(CENTER);
+    
+    cp.pg.clear();
+    cp.pg.colorMode(HSB, 360, 100, 100);
+    drawHandDrawnCircleOn(cp.pg, cp.r, cp.r, 10, cp.r * 0.9, progress);
+
     image(cp.pg, 0, 0);
     pop();
   }
@@ -43,7 +50,7 @@ function draw() {
 function generateShapes() {
   randomCirclePosition = [];
   let tries = 0;
-  let count = 50;
+  let count = 100;
 
   while (randomCirclePosition.length < count && tries < 10000) {
     let r = random(30, 80);
@@ -72,7 +79,10 @@ function generateShapes() {
       let angle = random(TWO_PI);
       let speed = random([-1, 1]) * random(PI / 6000, PI / 3000);
 
-      randomCirclePosition.push({ x, y, r, pg, angle, speed });
+      randomCirclePosition.push({ 
+        x, y, r, pg, angle, speed,
+        timer: random(0, TWO_PI)//Randomised start time to avoid all circles unfolding at the same time
+    });
     }
     tries++;
   }
@@ -84,10 +94,10 @@ function windowResized() {
   needRedrawBuffers = true;
 }
 
-function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius) {
+function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, progress = 1) {
   let outerMostRadius = maxRadius;
   for (let i = numLayers; i > 0; i--) {
-    let radius = (i / numLayers) * maxRadius;
+    let radius = (i / numLayers) * maxRadius * progress;
     let baseCol = color(random(palette));
     g.fill(hue(baseCol), saturation(baseCol), brightness(baseCol), 80);
     g.noStroke();

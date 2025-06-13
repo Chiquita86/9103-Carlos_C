@@ -84,7 +84,7 @@ This shows the result of layered rendering — background blobby waves, mid-laye
 ### Figure 2: Animated interaction demo  
 Clicking spawns blue perlin bubbles and particle trails that flow and fade.
 <p align="center">
-  <img src="./assets/interaction.gif.gif" width="1000">
+  <img src="./assets/interaction.gif" width="1000">
 </p>
 
 ---
@@ -180,6 +180,30 @@ for (let i = waveParticles.length - 1; i >= 0; i--) {
   let p = waveParticles[i];  p.update();  p.show(waveLayer);
   if (p.dead) waveParticles.splice(i, 1);
 }
+
+// DotParticle: uses noise(x, y, t) to steer direction
+update() {
+  const θ = noise(this.pos.x * 0.005,
+                  this.pos.y * 0.005,
+                  waveFrame  * 0.004) * TWO_PI * 4;   // ← 3-D noise
+  this.pos.add(p5.Vector.fromAngle(θ).mult(random(1, 3)));
+  this.life -= 5;
+  this.size *= 0.96;
+  this.dead = (this.life <= 0 || this.size < 0.5);
+}
+
+// LetterParticle: same idea with slight parameter shift
+update() {
+  const θ = noise(this.pos.x * 0.005,
+                  this.pos.y * 0.005,
+                  waveFrame  * 0.004 + 1000) * TWO_PI * 2;
+  this.pos.x += cos(θ) * 1.5;
+  this.pos.y += sin(θ) * 1.5;
+  this.life  -= 4;
+  this.size  *= 0.98;
+  this.dead   = (this.life <= 0 || this.size < 4);
+}
+
 ```
 Trails persist via a low-alpha erase pass; particles follow a 3-D noise flow field.
 
@@ -240,5 +264,21 @@ Residual fading is applied solely to the particle layer; other layers remain sha
 
 ### 7.5 Noise-Perturbed Interaction  
 Ripples and bubbles receive polar-coordinate noise, so each click creates a distinct outline. The interactive layer self-fades, preventing artefact build-up during extended interaction.
+
+---
+
+## 8 Perlin-Noise Highlights  
+
+> The excerpts below make explicit how Perlin noise drives every layer of the sketch—colour, geometry, motion, and interaction.  
+
+| Purpose | Code excerpt |
+|---------|--------------|
+| **Gradient drift** – background hue shifts over time | ```js let raw = noise(millis()*0.002 + gradPhase); let mid = 0.5 + (raw - .5) * 0.8; waveGradient = drawingContext.createLinearGradient(0,0,width,0); waveGradient.addColorStop(0, '#87dfd6'); waveGradient.addColorStop(mid, '#01a9b4'); waveGradient.addColorStop(1, '#01a9b4'); ``` |
+| **Blobby Wave** – vertical offset per vertex | ```js let offset = map(noise(xoff, yoff), 0, 1, -60, 60); vertex(x, i + offset); yoff += 0.01; ``` |
+| **Colour-Ring mutation** – radius & layer count | ```js let n = noise(t + cp.noisePhase); let dynamicR = cp.r * (1 + (n-.5)*.4); let layers = 10 + floor((n-.5)*4); ``` |
+| **Particle steering** – 3-D flow field | ```js const θ = noise(this.pos.x*0.005, this.pos.y*0.005, waveFrame*0.004) * TWO_PI * 4; this.pos.add(p5.Vector.fromAngle(θ).mult(random(1,3))); ``` |
+| **Ripple edge deformation** – polar noise | ```js let noiseOffset = map(noise(a*5 + this.noiseSeed, frameCount*0.02), 0,1,-10,10); let xPos = this.x + (this.radius + noiseOffset) * cos(a); ``` |
+
+Each snippet uses either **2-D** (`noise(x,y)`), **3-D** (`noise(x,y,t)`) or **polar-coordinate** sampling to keep the system in continuous, non-repeating motion—fulfilling the project’s focus on *Perlin Noise and Randomness as Dynamic Animation Drivers*.
 
 ---

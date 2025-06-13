@@ -159,29 +159,38 @@ function setup() {
 function initCircles() {
     randomCirclePosition = [];
     let circleNumber = 80, tries = 0;
-    while (randomCirclePosition.length < circleNumber && tries < 10000) {
-    let r = random(30, 80);
-    let x = random(r, width - r);
-    let y = random(r, height - r);
-    //collision detection
-    let overlap = randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < r + cp.r + 2);
-    if (!overlap) {
-      let padding = 20;
-      let pg = createGraphics((r + padding) * 2, (r + padding) * 2);
-      pg.colorMode(HSB, 360, 100, 100);
-      pg.clear();
-      //choose 20% chance be zigzag style, otherwise hand drawn
-      if (random(1) < 0.2) drawZigzagCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
-      else  drawHandDrawnCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
-      randomCirclePosition.push({
-        x, y, r, pg,
-        angle: random(TWO_PI), speed: random([-1,1]) * random(PI/6000, PI/3000),
-        floatPhaseX: random(TWO_PI), 
-        floatPhaseY: random(TWO_PI), 
-        floatAmplitude: random(5,20), 
-        noisePhase: random(1000)
-      });
+
+    function isOverlap(x, y, r) {
+        return randomCirclePosition.some(cp => dist(x, y, cp.x, cp.y) < r + cp.r + 2);
     }
+
+    function createCircleBuffer(r) {
+        let padding = 20;
+        let pg = createGraphics((r + padding) * 2, (r + padding) * 2);
+        pg.colorMode(HSB, 360, 100, 100);
+        pg.clear();
+        //choose 20% chance be zigzag style, otherwise hand drawn
+        if (random(1) < 0.2) drawZigzagCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
+        else  drawHandDrawnCircleOn(pg, r + padding, r + padding, 10, r * 0.9);
+        return pg;
+    }
+
+    while (randomCirclePosition.length < circleNumber && tries < 10000) {
+      let r = random(30, 80);
+      let x = random(r, width - r);
+      let y = random(r, height - r);
+    //collision detection
+if (!isOverlap(x, y, r)) {
+      let pg = createCircleBuffer(r);
+      randomCirclePosition.push({
+          x, y, r, pg,
+          angle: random(TWO_PI), speed: random([-1,1]) * random(PI/6000, PI/3000),
+          floatPhaseX: random(TWO_PI), 
+          floatPhaseY: random(TWO_PI), 
+          floatAmplitude: random(5,20), 
+          noisePhase: random(1000)
+        });
+      }
     tries++;
   }
   needRedrawBuffers = true; // mark buffers for redraw
@@ -229,7 +238,7 @@ function initCircles() {
 
         background('#87dfd6'); //background color change
 
-        // Bottom layer: Blobby Wave
+        //Bottom layer: Blobby Wave
         //Blobby Wave: Multiple wave shapes are generated using noise(), and the frequency of each wave increases
         noStroke();
         drawingContext.shadowOffsetX = 5;
@@ -251,8 +260,6 @@ function initCircles() {
         vertex(width, i);
         vertex(width, height);
         endShape(CLOSE);
-        // Draw the interactive layer (make sure it is on top of all layers)
-        drawInteractiveLayer();
     }
     yoff += 0.01;  //advance noise to over time
 
@@ -587,9 +594,6 @@ function mouseClicked() {
         isLongPress = true;
         lastPressTime = millis();
         setTimeout(() => {
-            if (isLongPress) {
-                spawnTextParticles(mouseX, mouseY);
-            }
             isLongPress = false;
         }, PRESS_DURATION);
     } else {
@@ -602,14 +606,6 @@ function mouseReleased() {
     isLongPress = false;
 }
 
-// Generate text particles
-function spawnTextParticles(x, y) {
-    const char = chars[floor(random(chars.length))];
-    const particleCount = random(15, 25);
-    for (let i = 0; i < particleCount; i++) {
-        textParticles.push(new TextParticle(x, y, char));
-    }
-}
 
 // Perlin Bubble type (with noise fluctuation effect)
 class PerlinBubble {

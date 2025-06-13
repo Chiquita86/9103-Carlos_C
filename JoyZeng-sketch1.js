@@ -67,7 +67,18 @@ const fadeAlpha = 10; //fade alpha for trails
 
 // Dynamic gradient parameters
 let gradPhase; // holds noise phase for gradient
-let currentMid = 0.5; ;
+let currentMid = 0.5;
+
+//Add interactive Layer
+let interactiveLayer;
+let perlinBubbles = []; //Add perlin bubble array
+let textParticles = []; //text particles
+let isLongPress = false; //Long press sign
+const PRESS_DURATION = 300; //Long press threshold (milliseconds)
+let lastPressTime = 0; //The time of the last press
+
+//Add an array for storing ripples
+let ripples = [];
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -98,6 +109,10 @@ function setup() {
       waveLayer = createGraphics(width, height); //create offscreen layer
       waveLayer.clear(); //clear offscreen
       initWave(); //init particle grid
+
+      //Add initialize the interactive layer
+      interactiveLayer = createGraphics(width, height);
+      interactiveLayer.clear();
     }
 
     /**
@@ -132,6 +147,12 @@ function setup() {
        initCircles(); //reset circles
        waveLayer.resizeCanvas(width, height); //resize offscreen
        initWave(); //reset particle grid
+       
+      //Reset the interactive layer
+      interactiveLayer.resizeCanvas(windowWidth, windowHeight);
+      interactiveLayer.clear();
+      perlinBubbles = [];
+      textParticles = [];
     }
 
     // Initialize non-overlapping floating circles with offscreen buffers
@@ -230,6 +251,8 @@ function initCircles() {
         vertex(width, i);
         vertex(width, height);
         endShape(CLOSE);
+        // Draw the interactive layer (make sure it is on top of all layers)
+        drawInteractiveLayer();
     }
     yoff += 0.01;  //advance noise to over time
 
@@ -335,8 +358,17 @@ function initCircles() {
   //Step 3: Composite the offscreen buffer onto the main canvas.
   image(waveLayer,0,0);
   if (waveGrid.every(c=>c.dead)&&waveParticles.length===0) initWave();
-}
 
+    //Add interactive layer, draw ripples
+    for (let i = ripples.length - 1; i >= 0; i--) {
+        let ripple = ripples[i];
+        ripple.update();
+        ripple.show();
+        if (ripple.isDead()) {
+            ripples.splice(i, 1);
+        }
+    }
+}
 //initialize grid for particle emission
 function initWave() {
   waveGrid=[]; waveParticles=[]; waveFrame=0;
@@ -469,3 +501,184 @@ class LetterParticle {
         g.endShape(CLOSE);
         drawHandDrawnCircleOn(g, cx, cy, numLayers, outerRadius * 0.6,noiseVal); //Add noiseVal
     }  
+
+
+//Add mouse click function
+function mouseClicked() {
+    ripples.push(new Ripple(mouseX, mouseY));
+}
+
+//Add ripple class
+class Ripple {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.alpha = 255;
+        this.speed = 3;
+    }
+
+    update() {
+        this.radius += this.speed;
+        this.alpha -= 5;
+    }
+
+    show() {
+        stroke(0, 0, 100, this.alpha);
+        strokeWeight(2);
+        noFill();
+        ellipse(this.x, this.y, this.radius * 2);
+    }
+
+    isDead() {
+        return this.alpha <= 0;
+    }
+}
+function drawInteractiveLayer() {
+    // Clear the interaction layer (keep the transparency)
+    interactiveLayer.drawingContext.globalCompositeOperation = 'destination-out';
+    interactiveLayer.fill(0, 0, 0, 5);
+    interactiveLayer.rect(0, 0, width, height);
+    interactiveLayer.drawingContext.globalCompositeOperation = 'source-over';
+    
+    // Update and draw the Perlin bubble
+    for (let i = perlinBubbles.length - 1; i >= 0; i--) {
+        perlinBubbles[i].update();
+        perlinBubbles[i].show(interactiveLayer);
+        if (perlinBubbles[i].isDead()) {
+            perlinBubbles.splice(i, 1);
+        }
+    }
+    
+    // Update and draw the text particles
+    for (let i = textParticles.length - 1; i >= 0; i--) {
+        textParticles[i].update();
+        textParticles[i].show(interactiveLayer);
+        if (textParticles[i].isDead()) {
+            textParticles.splice(i, 1);
+        }
+    }
+    
+    // Draw the interactive layer onto the main canvas
+    image(interactiveLayer, 0, 0);
+}
+
+// Add Mouse click event (generating Perlin bubbles or text particles)
+function mouseClicked() {
+    // Short press generates bubbles, long press generates text particles
+    if (millis() - lastPressTime < PRESS_DURATION) {
+        isLongPress = true;
+        lastPressTime = millis();
+        setTimeout(() => {
+            if (isLongPress) {
+                spawnTextParticles(mouseX, mouseY);
+            }
+            isLongPress = false;
+        }, PRESS_DURATION);
+    } else {
+        lastPressTime = millis();
+        perlinBubbles.push(new PerlinBubble(mouseX, mouseY));
+    }
+}
+
+function mouseReleased() {
+    isLongPress = false;
+}
+
+// Generate text particles
+function spawnTextParticles(x, y) {
+    const char = chars[floor(random(chars.length))];
+    const particleCount = random(15, 25);
+    for (let i = 0; i < particleCount; i++) {
+        textParticles.push(new TextParticle(x, y, char));
+    }
+}
+
+// Perlin Bubble type (with noise fluctuation effect)
+class PerlinBubble {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.maxRadius = random(80, 150);
+        this.alpha = 255;
+        this.speed = random(1.5, 3);
+        this.noiseSeed = random(1000); // Each bubble has an independent noise seed
+    }
+    
+    update() {
+        this.radius += this.speed;
+        this.alpha -= 3;
+        if (this.radius > this.maxRadius) {
+            this.alpha -= 5;
+        }
+    }
+    
+    show(pg) {
+        pg.push();
+        pg.noFill();
+        pg.stroke(50, 150, 255, this.alpha); // Blue strokes
+        pg.strokeWeight(2);
+        
+        // Generate fluctuation edges using Perlin noise
+        pg.beginShape();
+        let detail = 60; // Edge detail points
+        for (let i = 0; i < detail; i++) {
+            let angle = TWO_PI * i / detail;
+            // Noise affects radius offset and generates natural fluctuations
+            let noiseOffset = map(noise(angle * 5 + this.noiseSeed, frameCount * 0.02), 0, 1, -10, 10);
+            let xPos = this.x + (this.radius + noiseOffset) * cos(angle);
+            let yPos = this.y + (this.radius + noiseOffset) * sin(angle);
+            pg.vertex(xPos, yPos);
+        }
+        pg.endShape(CLOSE);
+        
+        pg.pop();
+    }
+    
+    isDead() {
+        return this.alpha <= 0;
+    }
+}
+
+// TextPaticle
+class TextParticle {
+    constructor(x, y, char) {
+        this.pos = createVector(x, y);
+        this.char = char;
+        this.life = 255;
+        this.size = random(12, 24);
+        this.speed = random(2, 5);
+        this.angle = random(TWO_PI);
+        this.noiseAmp = random(10, 20);
+        this.dead = false;
+    }
+    
+    update() {
+        // Generate natural motion trajectories using Perlin noise
+        let noiseX = noise(this.pos.x * 0.01, this.pos.y * 0.01, frameCount * 0.02) * 2 - 1;
+        let noiseY = noise(this.pos.x * 0.01 + 100, this.pos.y * 0.01 + 100, frameCount * 0.02) * 2 - 1;
+        
+        this.pos.x += cos(this.angle) * this.speed + noiseX * 3;
+        this.pos.y += sin(this.angle) * this.speed + noiseY * 3;
+        
+        this.life -= 2;
+        this.size *= 0.98;
+        if (this.life <= 0 || this.size < 4) {
+            this.dead = true;
+        }
+    }
+    
+    show(pg) {
+        pg.push();
+        pg.translate(this.pos.x, this.pos.y);
+        pg.rotate(noise(this.pos.x * 0.01, this.pos.y * 0.01) * 0.6 - 0.3);
+        
+        pg.noStroke();
+        pg.fill(50, 150, 255, this.life);
+        pg.textSize(this.size);
+        pg.text(this.char, 0, 0);
+        
+        pg.pop();
+    }
+}

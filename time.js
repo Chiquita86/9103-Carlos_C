@@ -18,8 +18,8 @@ function setup() {
 function draw() {
   background(0);
   for (let cp of randomCirclePosition) {
-    cp.timer += 0.01; 
-    let progress = (sin(cp.timer) + 1) / 2; 
+    let t = millis() / 5000 + cp.offset; // Controls animation speed
+    let progress = (sin(t * TWO_PI) + 1) / 2; // Maps to 0~1 over time
     push();
     translate(cp.x, cp.y);
     rotate(cp.angle);
@@ -50,7 +50,7 @@ function draw() {
 function generateShapes() {
   randomCirclePosition = [];
   let tries = 0;
-  let count = 100;
+  let count = 300;
 
   while (randomCirclePosition.length < count && tries < 10000) {
     let r = random(30, 80);
@@ -81,7 +81,7 @@ function generateShapes() {
 
       randomCirclePosition.push({ 
         x, y, r, pg, angle, speed,
-        timer: random(0, TWO_PI)//Randomised start time to avoid all circles unfolding at the same time
+        offset: random(TWO_PI)//Randomised start time to avoid all circles unfolding at the same time
     });
     }
     tries++;
@@ -94,6 +94,7 @@ function windowResized() {
   needRedrawBuffers = true;
 }
 
+// Draw concentric rings with optional ripple progress (0 ~ 1)
 function drawHandDrawnCircleOn(g, cx, cy, numLayers, maxRadius, progress = 1) {
   let outerMostRadius = maxRadius;
   for (let i = numLayers; i > 0; i--) {
